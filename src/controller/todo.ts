@@ -8,9 +8,7 @@ export function getTodos(_: Request, res: Response) {
       message: "No todos found",
     });
   } else {
-    res.status(400).json({
-      ...data,
-    });
+    res.status(404).json([...data]);
   }
 }
 
@@ -21,67 +19,40 @@ export function createTodo(req: Request, res: Response) {
       message: "Task is missing. Couldn't create a Todo",
     });
   }
-  const { task } = body.task;
-  const data = TodoService.createTodo(task as string);
-  if (data) {
-    res.status(200).send({
-      message: "Todo Created Succesfully",
-    });
+  const { task } = body;
+  const service_response = TodoService.createTodo(task as string);
+  if (service_response.data) {
+    res.status(200).send(service_response);
   } else {
-    res.status(404).send({
-      message: "Couldn't create a Todo",
-    });
+    res.status(404).send(service_response);
   }
 }
 
 export function updateTodo(req: Request, res: Response) {
   const id = parseInt(req.params.id, 10);
-  const { body } = req;
-  const task = String(body.task);
-  const data = TodoService.updateTodo(id, task);
-  if (data) {
-    res.status(200).send({
-      message: "Todo Updated Succesfully",
-      data,
-    });
+  const { query } = req;
+  const { task, isCompleted } = req.body;
+  const service_response = TodoService.updateTodo(
+    id,
+    String(query.update),
+    task,
+    isCompleted,
+  );
+  if (service_response.data) {
+    res.status(200).send(service_response);
   } else {
-    res.status(404).send({
-      message: "Couldn't update a Todo",
-      todo: data,
-    });
-  }
-}
-
-export function updateTodoStatus(req: Request, res: Response) {
-  const { body } = req;
-  const id = parseInt(req.params.id, 10);
-  const isCompleted = !!body.isCompleted;
-  const data = TodoService.updateTodoStatus(id, isCompleted);
-  if (data) {
-    res.status(200).send({
-      message: "Todo Updated Succesfully",
-      data,
-    });
-  } else {
-    res.status(404).send({
-      message: "Couldn't update a Todo",
-      todo: data,
-    });
+    res.status(404).send(service_response);
   }
 }
 
 export function deleteTodo(req: Request, res: Response) {
-  const { body } = req;
-  const id = parseInt(body.id, 10);
-  const data = TodoService.deleteTodo(id);
-  if (data) {
-    res.status(200).json({
-      message: "Succesfully deleted Todo",
-      todo: data,
-    });
+  const { params } = req;
+  const id = parseInt(params.id, 10);
+  console.log(id);
+  const service_response = TodoService.deleteTodo(id);
+  if (service_response.data) {
+    res.status(200).send(service_response);
   } else {
-    res.status(404).json({
-      message: "Couldn't find the todo",
-    });
+    res.status(404).send(service_response);
   }
 }

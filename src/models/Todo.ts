@@ -5,18 +5,11 @@ export function getTodos(): ITodo[] {
   return todos;
 }
 
-export function createTodo(task: string): boolean {
+export function createTodo(todo: ITodo): ITodo | null {
   const oldLength = todos.length;
-  const id = todos[todos.length - 1].id + 1;
-  todos.push({
-    id,
-    task,
-    isCompleted: false,
-    createdAt: new Date(),
-    completedAt: null,
-  });
+  todos.push(todo);
   const newLength = todos.length;
-  return newLength > oldLength;
+  return newLength > oldLength ? todo : null;
 }
 
 export function updateTodo(id: number, task: string): ITodo | null {
@@ -33,7 +26,7 @@ export function updateTodoStatus(
   const todo = todos.find((todo) => todo.id === id);
   if (!todo) return null;
   todo.isCompleted = isCompleted;
-  if (isCompleted) {
+  if (todo.isCompleted) {
     todo.completedAt = new Date();
   }
   return todo;

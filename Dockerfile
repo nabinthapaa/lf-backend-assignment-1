@@ -10,4 +10,4 @@ EXPOSE 8000
 
 COPY . .
 
-CMD ["npm", "run", "start"]
+CMD ["npm", "run", "dev"]
