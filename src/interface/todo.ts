@@ -1,5 +1,8 @@
+import { UUID } from "crypto";
+
 export interface ITodo {
-  id: number;
+  id: UUID;
+  user: UUID;
   task: string;
   isCompleted: boolean;
   createdAt: Date;

@@ -1,1 +1,8 @@
+.git
+.github
 node_modules
+.env
+.env.*
+.gitignore
+compose.yml
+Dockerfile

@@ -1,15 +1,17 @@
+import { UUID } from "crypto";
 import { ITodo } from "../interface/todo";
 import * as TodoModel from "../models/Todo";
-import { getTodoId } from "../utils/getId";
+import { getUUID } from "../utils/getUUID";
 
-export function getTodos() {
-  return TodoModel.getTodos();
+export async function getTodos() {
+  return await TodoModel.getTodos();
 }
 
-export function createTodo(task: string) {
+export function createTodo(task: string, userId: UUID = crypto.randomUUID()) {
   const todo: ITodo = {
-    id: getTodoId(),
+    id: getUUID(),
     task,
+    user: userId,
     createdAt: new Date(),
     isCompleted: false,
     completedAt: null,
@@ -29,7 +31,7 @@ export function createTodo(task: string) {
 }
 
 export function updateTodo(
-  id: number,
+  id: UUID,
   query: string,
   task?: string,
   isCompleted?: boolean,
@@ -53,7 +55,7 @@ export function updateTodo(
   }
 }
 
-export function deleteTodo(id: number): {
+export function deleteTodo(id: UUID): {
   message: string;
   data: ITodo | null;
 } {

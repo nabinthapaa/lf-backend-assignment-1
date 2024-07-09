@@ -1,28 +1,32 @@
+import { UUID } from "crypto";
 import { ITodo } from "../interface/todo";
-import todos from "../data/todos";
+import fs from "fs/promises";
+import path from "node:path";
 
-export function getTodos(): ITodo[] {
+const todos: ITodo[] = [];
+
+export async function getTodos(): Promise<ITodo[]> {
+  const pathToFile = path.join(__dirname, "../data/todo.json");
+  const todos: ITodo[] = JSON.parse(await fs.readFile(pathToFile, "utf8"));
   return todos;
 }
 
 export function createTodo(todo: ITodo): ITodo | null {
-  const oldLength = todos.length;
-  todos.push(todo);
-  const newLength = todos.length;
-  return newLength > oldLength ? todo : null;
+  fs.readFile("../data/todo.json")
+    .then((data) => console.log(data))
+    .catch((error) => console.log(error));
+
+  return null;
 }
 
-export function updateTodo(id: number, task: string): ITodo | null {
+export function updateTodo(id: UUID, task: string): ITodo | null {
   const todo = todos.find((todo) => todo.id === id);
   if (!todo) return null;
   todo.task = task;
   return todo;
 }
 
-export function updateTodoStatus(
-  id: number,
-  isCompleted: boolean,
-): ITodo | null {
+export function updateTodoStatus(id: UUID, isCompleted: boolean): ITodo | null {
   const todo = todos.find((todo) => todo.id === id);
   if (!todo) return null;
   todo.isCompleted = isCompleted;
@@ -32,7 +36,7 @@ export function updateTodoStatus(
   return todo;
 }
 
-export function deleteTodo(id: number): ITodo | null {
+export function deleteTodo(id: UUID): ITodo | null {
   const todo = todos.find((todo) => todo.id === id);
   const remaining = todos.filter((todo) => todo.id !== id);
   if (!todo) return null;

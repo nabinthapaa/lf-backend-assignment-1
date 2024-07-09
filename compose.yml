@@ -1,0 +1,13 @@
+services:
+  backend:
+    container_name: todo_api_container
+    # image: s0skai/lf-backend-todo:latest
+    build: .
+    environment:
+      - PORT=${PORT}
+      - JWT_SECRET=${JWT_SECRET}
+    ports:
+      - ${PORT}:8000
+    restart: always
+    volumes:
+      - .:/code
