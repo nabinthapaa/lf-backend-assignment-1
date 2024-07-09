@@ -63,3 +63,12 @@ export async function deleteUser(id: UUID) {
     }
   }
 }
+
+export async function getUserByEmail(email: string) {
+  const data = await UserModel.getUserByEmail(email);
+  if (data) {
+    return data;
+  }
+
+  throw new Error(`User with ${email} not found`);
+}

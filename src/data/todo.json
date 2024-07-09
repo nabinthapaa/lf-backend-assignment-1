@@ -6,5 +6,29 @@
     "createdAt": "2024-07-09T08:58:05.465Z",
     "isCompleted": false,
     "completedAt": null
+  },
+  {
+    "id": "a701a9a7-3b72-4b0e-99b8-c8b4ce46d541",
+    "task": "New new task",
+    "user": "81668643-fc68-4ae5-acf6-3bc086101d03",
+    "createdAt": "2024-07-09T20:35:14.919Z",
+    "isCompleted": true,
+    "completedAt": "2024-07-09T20:38:14.778Z"
+  },
+  {
+    "id": "1095038a-9c8f-4601-a028-bcff87ff2838",
+    "task": "New new task",
+    "user": "81668643-fc68-4ae5-acf6-3bc086101d03",
+    "createdAt": "2024-07-09T20:35:35.245Z",
+    "isCompleted": false,
+    "completedAt": null
+  },
+  {
+    "id": "cb73c465-6295-4675-be5a-6a61d5d8c15b",
+    "task": "New new task",
+    "user": "81668643-fc68-4ae5-acf6-3bc086101d03",
+    "createdAt": "2024-07-09T20:35:43.301Z",
+    "isCompleted": false,
+    "completedAt": null
   }
 ]

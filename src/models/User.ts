@@ -86,6 +86,22 @@ export async function deleteUser(id: UUID) {
   }
 }
 
+export async function getUserByEmail(email: string) {
+  try {
+    const parsed_data = await getUsersData();
+    const user = parsed_data.find(
+      ({ email: userEmail }) => userEmail === email,
+    );
+    console.log(user);
+    return user;
+  } catch (e) {
+    if (e instanceof Error) {
+      console.log("Model -> deleteUser: ", email);
+      throw new Error(e.message);
+    }
+  }
+}
+
 async function getUsersData(): Promise<IUser[]> {
   try {
     const usersData = await fs.readFile(pathToUserData, "utf8");

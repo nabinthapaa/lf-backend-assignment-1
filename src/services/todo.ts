@@ -3,11 +3,11 @@ import { ITodo } from "../interface/todo";
 import * as TodoModel from "../models/Todo";
 import { getUUID } from "../utils/getUUID";
 
-export async function getTodos() {
-  return await TodoModel.getTodos();
+export async function getTodos(userId: UUID) {
+  return await TodoModel.getTodos(userId);
 }
 
-export function createTodo(task: string, userId: UUID = crypto.randomUUID()) {
+export async function createTodo(task: string, userId: UUID) {
   const todo: ITodo = {
     id: getUUID(),
     task,
@@ -16,7 +16,7 @@ export function createTodo(task: string, userId: UUID = crypto.randomUUID()) {
     isCompleted: false,
     completedAt: null,
   };
-  const data = TodoModel.createTodo(todo);
+  const data = await TodoModel.createTodo(todo);
   if (data) {
     return {
       message: "Todo created successfully",
@@ -30,17 +30,18 @@ export function createTodo(task: string, userId: UUID = crypto.randomUUID()) {
   }
 }
 
-export function updateTodo(
+export async function updateTodo(
   id: UUID,
   query: string,
+  user: UUID,
   task?: string,
   isCompleted?: boolean,
-): { message: string; data: ITodo | null } {
+): Promise<{ message: string; data: ITodo | null }> {
   let data: ITodo | null = null;
   if (query === "status" && typeof isCompleted === "boolean") {
-    data = TodoModel.updateTodoStatus(id, isCompleted);
+    data = await TodoModel.updateTodoStatus(id, isCompleted, user);
   } else if (query === "task" && typeof task === "string") {
-    data = TodoModel.updateTodo(id, task);
+    data = await TodoModel.updateTodo(id, task, user);
   }
   if (data) {
     return {
@@ -55,11 +56,14 @@ export function updateTodo(
   }
 }
 
-export function deleteTodo(id: UUID): {
+export async function deleteTodo(
+  id: UUID,
+  userId: UUID,
+): Promise<{
   message: string;
   data: ITodo | null;
-} {
-  const data = TodoModel.deleteTodo(id);
+}> {
+  const data = await TodoModel.deleteTodo(id, userId);
   if (data) {
     return {
       message: "Successfully deleted",
