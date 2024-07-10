@@ -92,7 +92,6 @@ export async function getUserByEmail(email: string) {
     const user = parsed_data.find(
       ({ email: userEmail }) => userEmail === email,
     );
-    console.log(user);
     return user;
   } catch (e) {
     if (e instanceof Error) {

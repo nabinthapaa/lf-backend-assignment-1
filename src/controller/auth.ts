@@ -63,7 +63,9 @@ export async function refresh(req: Request, res: Response) {
         name: data.name,
         email: data.email,
       };
-      const accessToken = sign(payload, config.jwt.secret!);
+      const accessToken = sign(payload, config.jwt.secret!, {
+        expiresIn: config.jwt.accessTokenExpiryMS,
+      });
       const refreshToken = token[1];
 
       res.status(200).json({

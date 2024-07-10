@@ -20,7 +20,7 @@ export async function login(data: Pick<IUser, "email" | "password">) {
 
   if (!isValidPassword) {
     return {
-      error: "Invalid password",
+      error: "",
     };
   }
 
@@ -35,7 +35,6 @@ export async function login(data: Pick<IUser, "email" | "password">) {
       error: "Internal Error. Contact tech support",
     };
   }
-
   const accessToken = sign(payload, config.jwt.secret, {
     expiresIn: config.jwt.accessTokenExpiryMS,
   });

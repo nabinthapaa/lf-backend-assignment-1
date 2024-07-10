@@ -67,6 +67,7 @@ export async function deleteUser(id: UUID) {
 export async function getUserByEmail(email: string) {
   const data = await UserModel.getUserByEmail(email);
   if (data) {
+    console.log("UserService -> GetUserByEmail", data);
     return data;
   }
 
