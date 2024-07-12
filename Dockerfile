@@ -1,16 +1,16 @@
-FROM node:20-alpine 
+FROM node:20-alpine3.20 
 
+RUN apk add --no-cache gcompat
 
 WORKDIR /app
 
 COPY package*.json ./
 
-RUN apk add --no-cache python3 make g++ build-base \
-  && npm install
+RUN npm i
 
 EXPOSE 8000
 
 COPY . .
 
-
 CMD ["npm", "run", "dev"]
+

@@ -1,7 +1,7 @@
 import config from "../config";
 import { IUser } from "../interface/user";
 import { getUserByEmail } from "./user";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { sign } from "jsonwebtoken";
 
 export async function login(data: Pick<IUser, "email" | "password">) {

@@ -1,4 +1,4 @@
-import { UUID } from "crypto";
+import { UUID } from "../types/types";
 
 export interface ITodo {
   id: UUID;

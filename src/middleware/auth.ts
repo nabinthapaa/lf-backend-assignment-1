@@ -9,20 +9,18 @@ export function auth(req: Request, _: Response, next: NextFunction) {
   const { authorization } = req.headers;
 
   if (!authorization) {
-    next(new UnauthenticatedError());
-    return;
+    throw new UnauthenticatedError();
   }
 
   const token = authorization.split(" ");
 
   if (token.length !== 2 || token[0] !== "Bearer") {
-    next(new UnauthenticatedError());
-    return;
+    throw new UnauthenticatedError();
   }
 
   verify(token[1], config.jwt.secret!, (error, data) => {
     if (error) {
-      next(new BaseError(error.message));
+      throw new BaseError(error.message);
     }
 
     if (typeof data !== "string" && data)

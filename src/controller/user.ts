@@ -1,11 +1,11 @@
-import { UUID } from "crypto";
-import { NextFunction, Request, Response } from "express";
+import { Response } from "express";
 import httpStatusCode from "http-status-codes";
-import { BadRequestError, BaseError, NotFoundError } from "../errors";
+import { BadRequestError } from "../errors";
+import { Request } from "../interface/auth";
 import { IUser } from "../interface/user";
 import * as UserService from "../services/user";
+import { UUID } from "../types/types";
 import loggerWithNameSpace from "../utils/logger";
-import { error } from "console";
 
 interface Query {
   id?: UUID;
@@ -13,27 +13,21 @@ interface Query {
 
 const logger = loggerWithNameSpace("UserController");
 
-export function getUserInfo(
+export async function getUserInfo(
   req: Request<any, any, any, Query>,
   res: Response,
-  next: NextFunction,
 ) {
+  logger.info("Getting user information");
   const { id } = req.query;
-  if (!id) return next(new BadRequestError("Id is required"));
-  UserService.getUserInfo(id!)
-    .then((value) => {
-      return res.status(httpStatusCode.OK).json(value);
-    })
-    .catch((err) => {
-      next(new NotFoundError(err.message));
-    });
+  if (!id) throw new BadRequestError("Id is required");
+
+  const data = await UserService.getUserInfo(id);
+  logger.info("Retrived user information");
+  return res.status(httpStatusCode.OK).json(data);
 }
 
-export function createUser(
-  req: Request<any, any, IUser>,
-  res: Response,
-  next: NextFunction,
-) {
+export async function createUser(req: Request<any, any, IUser>, res: Response) {
+  logger.info("Creating user");
   const { body } = req;
   const { email, password, name } = body;
   if (!email || !password || !name) {
@@ -41,54 +35,39 @@ export function createUser(
       error: "All the required fields are not provided",
     });
   }
-  UserService.createuser(body)
-    .then((value) => {
-      return res.status(httpStatusCode.OK).json({
-        message: "User created Successfully",
-        data: value,
-      });
-    })
-    .catch((err) => {
-      logger.error("Could not create user", err.message);
-      next(new BaseError("Could not create user"));
-    });
+  const data = await UserService.createUser(body);
+  logger.info(`User created: ${data.id}`);
+  return res.status(httpStatusCode.OK).json({
+    message: "User created Successfully",
+    data,
+  });
 }
 
-export function updateUser(
+export async function updateUser(
   req: Request<any, any, Partial<IUser>, Query>,
   res: Response,
-  next: NextFunction,
 ) {
+  logger.info("Updating user");
   const { id } = req.query;
   const { body } = req;
   if (!id) {
-    return res.status(httpStatusCode.BAD_REQUEST).json({
-      error: "Id is required",
-    });
+    throw new BadRequestError("Id is required");
   }
-  UserService.updateUser(id, body)
-    .then((value) => {
-      return res.status(httpStatusCode.OK).json(value);
-    })
-    .catch((_) => {
-      next(new BaseError("Could not update user"));
-    });
+  const data = await UserService.updateUser(id, body);
+  logger.info("User updated: ", id);
+  return res.status(httpStatusCode.OK).json(data);
 }
 
-export function deleteUser(
+export async function deleteUser(
   req: Request<any, any, any, Query>,
   res: Response,
-  next: NextFunction,
 ) {
+  logger.info("Deleting user");
   const { id } = req.query;
   if (!id) {
     throw new BadRequestError("Id is required");
   }
-  UserService.deleteUser(id)
-    .then((value) => {
-      res.status(httpStatusCode.OK).json(value);
-    })
-    .catch((e) => {
-      next(new BaseError("Could not delete user"));
-    });
+  let data = UserService.deleteUser(id);
+  logger.info("Deleting user: ", id);
+  res.status(httpStatusCode.OK).json(data);
 }

@@ -1,4 +1,4 @@
-import { UUID } from "crypto";
+import { UUID } from "../types/types";
 import { ITodo } from "../interface/todo";
 import * as TodoModel from "../models/Todo";
 import { getUUID } from "../utils/getUUID";

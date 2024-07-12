@@ -1,44 +1,38 @@
-import { IUser } from "../interface/user";
-import { UUID } from "crypto";
-import path from "path";
 import fs from "fs/promises";
+import path from "path";
+import { BaseError } from "../errors/BaseError";
+import { IUser } from "../interface/user";
+import { UUID } from "../types/types";
 
 const pathToUserData = path.join(__dirname, "../data/user.json");
 
-export async function getUserInfo(id: UUID) {
-  try {
-    const parsed_data: IUser[] = await getUsersData();
-
-    const user = parsed_data.find(({ id: userId }) => userId === id);
-    if (user) {
-      return {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-      };
-    }
-    return null;
-  } catch (e) {
-    if (e instanceof Error) {
-      throw new Error(e.message);
-    }
-  }
+export async function getUsers() {
+  return getUsersData();
 }
 
-export async function createuser(user: IUser) {
-  try {
-    const parsed_data: IUser[] = await getUsersData();
-    const userExists = parsed_data.find(({ email }) => email === user.email);
-    if (userExists) {
-      throw new Error(`User with ${user.email} already exists`);
-    }
+export async function getUserInfo(id: UUID) {
+  const parsed_data: IUser[] = await getUsersData();
+  const user = parsed_data.find(({ id: userId }) => userId === id);
+  if (user) {
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+    };
+  }
+  return null;
+}
+
+export async function createUser(user: IUser) {
+  const parsed_data: IUser[] = await getUsersData();
+  const userExists = parsed_data.find(({ email }) => email === user.email);
+  if (userExists) {
+    throw new BaseError(`User with ${user.email} already exists`);
+  } else {
     parsed_data.push(user);
     await writeUserData(parsed_data);
-    return user;
-  } catch (e) {
-    if (e instanceof Error) {
-      throw new Error(e.message);
-    }
+    const { password, ...otherInfo } = user;
+    return otherInfo;
   }
 }
 
