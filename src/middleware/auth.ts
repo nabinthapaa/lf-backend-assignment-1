@@ -1,28 +1,32 @@
-import { NextFunction, Response, Request } from "express";
+import { NextFunction, Response } from "express";
 import { verify } from "jsonwebtoken";
 import config from "../config";
+import { BaseError, UnauthenticatedError } from "../errors";
+import { Request } from "../interface/auth";
+import { IUser } from "../interface/user";
 
-export function auth(req: Request, res: Response, next: NextFunction) {
+export function auth(req: Request, _: Response, next: NextFunction) {
   const { authorization } = req.headers;
 
   if (!authorization) {
-    next(new Error("Unauthenticated"));
+    next(new UnauthenticatedError());
     return;
   }
 
   const token = authorization.split(" ");
 
   if (token.length !== 2 || token[0] !== "Bearer") {
-    next(new Error("Unauthenticated"));
+    next(new UnauthenticatedError());
     return;
   }
 
   verify(token[1], config.jwt.secret!, (error, data) => {
     if (error) {
-      throw new Error(error.message);
+      next(new BaseError(error.message));
     }
 
-    (req as any).user = data;
+    if (typeof data !== "string" && data)
+      req.user = data as Omit<IUser, "password">;
   });
   next();
 }

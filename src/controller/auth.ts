@@ -1,29 +1,35 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 import * as AuthService from "../services/auth";
 import { IUser } from "../interface/user";
 import { sign, verify } from "jsonwebtoken";
 import config from "../config";
+import loggerWithNameSpace from "../utils/logger";
+import { Request } from "../interface/auth";
+import httpStatusCode from "http-status-codes";
 
 interface LoginInfo extends Pick<IUser, "email" | "password"> {}
+
+const logger = loggerWithNameSpace("AuthController");
 
 export async function login(req: Request<any, any, LoginInfo>, res: Response) {
   const data = req.body;
   try {
     const service_response = await AuthService.login(data);
     if (!service_response.error) {
-      res.status(200).json({
+      return res.status(httpStatusCode.OK).json({
         message: "Login successfull",
         payload: service_response,
       });
     }
 
-    res.status(404).json({
+    res.status(httpStatusCode.INTERNAL_SERVER_ERROR).json({
       error: service_response.error || "Login failure internal error",
     });
   } catch (e) {
     if (e instanceof Error) {
-      console.log("AuthController -> login");
-      res.status(404).json({
+      logger.error(`Error: ${e.message}`);
+      if (e.stack) logger.error(e.stack);
+      res.status(httpStatusCode.INTERNAL_SERVER_ERROR).json({
         error: e.message,
       });
     }
@@ -31,28 +37,26 @@ export async function login(req: Request<any, any, LoginInfo>, res: Response) {
 }
 
 export async function refresh(req: Request, res: Response) {
-  console.log("Refreshing Token");
+  logger.info(`${req.method}:  ${req.url}`);
   const { authorization } = req.headers;
 
   if (!authorization) {
-    res.status(404).json({
-      error: "Invalid token",
+    return res.status(httpStatusCode.FORBIDDEN).json({
+      error: "Unauthorized",
     });
-    return;
   }
 
   const token = authorization.split(" ");
 
   if (token.length !== 2 || token[0] !== "Bearer") {
-    res.status(404).json({
+    return res.status(httpStatusCode.SERVICE_UNAVAILABLE).json({
       error: "Invalid method",
     });
-    return;
   }
 
   verify(token[1], config.jwt.secret!, (error, data) => {
     if (error) {
-      res.status(404).json({
+      res.status(httpStatusCode.INTERNAL_SERVER_ERROR).json({
         error: error.message,
       });
     }
@@ -68,7 +72,7 @@ export async function refresh(req: Request, res: Response) {
       });
       const refreshToken = token[1];
 
-      res.status(200).json({
+      res.status(httpStatusCode.OK).json({
         accessToken,
         refreshToken,
       });

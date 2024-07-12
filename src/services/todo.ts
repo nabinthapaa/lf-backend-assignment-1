@@ -4,7 +4,9 @@ import * as TodoModel from "../models/Todo";
 import { getUUID } from "../utils/getUUID";
 
 export async function getTodos(userId: UUID) {
-  return await TodoModel.getTodos(userId);
+  return (await TodoModel.getTodos(userId)).filter(
+    (todo) => todo.id === userId,
+  );
 }
 
 export async function createTodo(task: string, userId: UUID) {

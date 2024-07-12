@@ -57,7 +57,6 @@ async function getTodosFromFile() {
     const parsedData: ITodo[] = JSON.parse(usersData);
     return parsedData;
   } catch (error) {
-    console.error("Model -> getUsersData: ", error);
     throw new Error("Error reading user data");
   }
 }
@@ -67,7 +66,6 @@ async function writeTodos(todos: ITodo[]) {
     const data = JSON.stringify(todos, null, 2);
     await fs.writeFile(pathToTodos, data, "utf8");
   } catch (error) {
-    console.error("Model -> writeUserData: ", error);
     throw new Error("Internal Error");
   }
 }

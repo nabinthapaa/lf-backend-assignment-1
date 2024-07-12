@@ -20,7 +20,6 @@ export async function getUserInfo(id: UUID) {
     return null;
   } catch (e) {
     if (e instanceof Error) {
-      console.log("Error retrieving User info", id);
       throw new Error(e.message);
     }
   }
@@ -38,7 +37,6 @@ export async function createuser(user: IUser) {
     return user;
   } catch (e) {
     if (e instanceof Error) {
-      console.log("Model -> createUser: ", e.message);
       throw new Error(e.message);
     }
   }
@@ -64,7 +62,6 @@ export async function updateUser(id: UUID, data: Partial<IUser>) {
     return updatedUser;
   } catch (e) {
     if (e instanceof Error) {
-      console.log("Model -> updateUser: ", data);
       throw new Error(e.message);
     }
   }
@@ -80,7 +77,6 @@ export async function deleteUser(id: UUID) {
     await writeUserData(filtered_users);
   } catch (e) {
     if (e instanceof Error) {
-      console.log("Model -> deleteUser: ", id);
       throw new Error(e.message);
     }
   }
@@ -95,7 +91,6 @@ export async function getUserByEmail(email: string) {
     return user;
   } catch (e) {
     if (e instanceof Error) {
-      console.log("Model -> deleteUser: ", email);
       throw new Error(e.message);
     }
   }
@@ -107,7 +102,6 @@ async function getUsersData(): Promise<IUser[]> {
     const parsedData: IUser[] = JSON.parse(usersData);
     return parsedData;
   } catch (error) {
-    console.error("Model -> getUsersData: ", error);
     throw new Error("Error reading user data");
   }
 }
@@ -117,7 +111,6 @@ async function writeUserData(userData: IUser[]): Promise<void> {
     const data = JSON.stringify(userData, null, 2);
     await fs.writeFile(pathToUserData, data, "utf8");
   } catch (error) {
-    console.error("Model -> writeUserData: ", error);
     throw new Error("Internal Error");
   }
 }

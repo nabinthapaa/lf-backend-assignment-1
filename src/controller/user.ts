@@ -1,118 +1,94 @@
-import { Request, Response } from "express";
-import * as UserService from "../services/user";
 import { UUID } from "crypto";
+import { NextFunction, Request, Response } from "express";
+import httpStatusCode from "http-status-codes";
+import { BadRequestError, BaseError, NotFoundError } from "../errors";
 import { IUser } from "../interface/user";
+import * as UserService from "../services/user";
+import loggerWithNameSpace from "../utils/logger";
+import { error } from "console";
 
-interface Params {
+interface Query {
   id?: UUID;
 }
 
-export async function getUserInfo(
-  req: Request<any, any, any, Params>,
+const logger = loggerWithNameSpace("UserController");
+
+export function getUserInfo(
+  req: Request<any, any, any, Query>,
   res: Response,
+  next: NextFunction,
 ) {
   const { id } = req.query;
-  if (!id) {
-    res.status(404).json({
-      error: "Id is required",
+  if (!id) return next(new BadRequestError("Id is required"));
+  UserService.getUserInfo(id!)
+    .then((value) => {
+      return res.status(httpStatusCode.OK).json(value);
+    })
+    .catch((err) => {
+      next(new NotFoundError(err.message));
     });
-  }
-  try {
-    const service_response = await UserService.getUserInfo(id!);
-    if (!service_response) {
-      res.status(404).json({
-        error: "Could not find the user",
-      });
-    }
-    res.status(200).json(service_response);
-  } catch (e) {
-    if (e instanceof Error) {
-      console.log("UserController -> createUser", e.message);
-      res.status(404).json({
-        error: e.message,
-      });
-    }
-  }
 }
 
-export async function createUser(req: Request<any, any, IUser>, res: Response) {
+export function createUser(
+  req: Request<any, any, IUser>,
+  res: Response,
+  next: NextFunction,
+) {
   const { body } = req;
   const { email, password, name } = body;
   if (!email || !password || !name) {
-    res.status(404).json({
+    return res.status(httpStatusCode.BAD_REQUEST).json({
       error: "All the required fields are not provided",
     });
-    return;
   }
-  try {
-    const data = await UserService.createuser(body);
-    if (data) {
-      res.status(200).json({
+  UserService.createuser(body)
+    .then((value) => {
+      return res.status(httpStatusCode.OK).json({
         message: "User created Successfully",
-        data,
+        data: value,
       });
-    }
-
-    res.status(404).json({
-      error: "Could not create user",
+    })
+    .catch((err) => {
+      logger.error("Could not create user", err.message);
+      next(new BaseError("Could not create user"));
     });
-  } catch (e) {
-    if (e instanceof Error) {
-      console.log("UserController -> createUser: ", e.message);
-      res.status(404).json({
-        error: e.message,
-      });
-    }
-  }
 }
 
-export async function updateUser(
-  req: Request<any, any, Partial<IUser>, Params>,
+export function updateUser(
+  req: Request<any, any, Partial<IUser>, Query>,
   res: Response,
+  next: NextFunction,
 ) {
   const { id } = req.query;
   const { body } = req;
   if (!id) {
-    res.status(404).json({
+    return res.status(httpStatusCode.BAD_REQUEST).json({
       error: "Id is required",
     });
-    return;
   }
-  try {
-    const service_response = await UserService.updateUser(id, body);
-    if (service_response) {
-      res.status(200).json(service_response);
-    }
-
-    res.status(404).json({
-      error: "Could not update User",
+  UserService.updateUser(id, body)
+    .then((value) => {
+      return res.status(httpStatusCode.OK).json(value);
+    })
+    .catch((_) => {
+      next(new BaseError("Could not update user"));
     });
-  } catch (e) {
-    if (e instanceof Error) {
-      console.log("UserController -> updateuser");
-      res.status(404).json({ erroe: e.message });
-    }
-  }
 }
 
-export async function deleteUser(
-  req: Request<any, any, any, Params>,
+export function deleteUser(
+  req: Request<any, any, any, Query>,
   res: Response,
+  next: NextFunction,
 ) {
   const { id } = req.query;
   if (!id) {
-    res.status(404).json({
-      error: "No id provided",
+    throw new BadRequestError("Id is required");
+  }
+  UserService.deleteUser(id)
+    .then((value) => {
+      res.status(httpStatusCode.OK).json(value);
+    })
+    .catch((e) => {
+      next(new BaseError("Could not delete user"));
     });
-    return;
-  }
-  try {
-    const service_response = await UserService.deleteUser(id);
-    res.status(200).json(service_response);
-  } catch (e) {
-    if (e instanceof Error) {
-      console.log("UserController -> deleteUser: ");
-      res.status(404).json({ erroe: e.message });
-    }
-  }
 }

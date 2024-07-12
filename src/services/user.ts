@@ -3,23 +3,15 @@ import { IUser } from "../interface/user";
 import * as UserModel from "../models/User";
 import { getUUID } from "../utils/getUUID";
 import { hash } from "bcrypt";
+import { NotFoundError } from "../errors/NotFoundError";
+import { BaseError } from "../errors/BaseError";
 
 export async function getUserInfo(id: UUID) {
-  try {
-    const data = await UserModel.getUserInfo(id);
-
-    if (!data) {
-      throw new Error(`User with ${id} not found`);
-    }
-
-    console.log(data);
-    return data;
-  } catch (e) {
-    if (e instanceof Error) {
-      console.log("UserService -> getUserInfo", e.message);
-      throw new Error(e.message);
-    }
+  const data = await UserModel.getUserInfo(id);
+  if (!data) {
+    throw new NotFoundError(`User with ${id} not found`);
   }
+  return data;
 }
 
 export async function createuser(user: IUser) {
@@ -34,7 +26,6 @@ export async function createuser(user: IUser) {
     return await UserModel.createuser(hashedUser);
   } catch (e) {
     if (e instanceof Error) {
-      console.log("UserService -> createuser: ", e.message);
       throw new Error(e.message);
     }
   }
@@ -58,8 +49,7 @@ export async function deleteUser(id: UUID) {
     };
   } catch (e) {
     if (e instanceof Error) {
-      console.log("UserService -> deleteUser");
-      throw new Error(e.message);
+      throw new BaseError(e.message);
     }
   }
 }
@@ -67,9 +57,8 @@ export async function deleteUser(id: UUID) {
 export async function getUserByEmail(email: string) {
   const data = await UserModel.getUserByEmail(email);
   if (data) {
-    console.log("UserService -> GetUserByEmail", data);
     return data;
   }
 
-  throw new Error(`User with ${email} not found`);
+  throw new BaseError(`User with ${email} not found`);
 }

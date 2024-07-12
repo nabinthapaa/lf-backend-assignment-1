@@ -5,10 +5,11 @@ import {
   updateUser,
   deleteUser,
 } from "../controller/user";
+import { auth } from "../middleware/auth";
 
 const router = express();
 
-router.get("/", getUserInfo);
+router.get("/", auth, getUserInfo);
 router.post("/", createUser);
 router.put("/", updateUser);
 router.delete("/", deleteUser);
