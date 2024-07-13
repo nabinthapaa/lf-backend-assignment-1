@@ -1,42 +1,73 @@
+import { UUID } from "../types/types";
 import { ITodo } from "../interface/todo";
-import todos from "../data/todos";
+import fs from "fs/promises";
+import path from "node:path";
 
-export function getTodos(): ITodo[] {
-  return todos;
+const pathToTodos = path.join(__dirname, "../data/todo.json");
+
+export async function getTodos(userId: UUID): Promise<ITodo[]> {
+  const todos = await getTodosFromFile();
+  return todos.filter(({ user }) => user === userId);
 }
 
-export function createTodo(todo: ITodo): ITodo | null {
-  const oldLength = todos.length;
+export async function createTodo(todo: ITodo) {
+  const todos = await getTodosFromFile();
   todos.push(todo);
-  const newLength = todos.length;
-  return newLength > oldLength ? todo : null;
+  await writeTodos(todos);
+  return todo;
 }
 
-export function updateTodo(id: number, task: string): ITodo | null {
-  const todo = todos.find((todo) => todo.id === id);
+export async function updateTodo(id: UUID, task: string, userId: UUID) {
+  const todos = await getTodosFromFile();
+  const todo = todos.find((todo) => todo.id === id && todo.user === userId);
   if (!todo) return null;
   todo.task = task;
   return todo;
 }
 
-export function updateTodoStatus(
-  id: number,
+export async function updateTodoStatus(
+  id: UUID,
   isCompleted: boolean,
-): ITodo | null {
-  const todo = todos.find((todo) => todo.id === id);
+  userId: UUID,
+) {
+  const todos = await getTodosFromFile();
+  const todo = todos.find((todo) => todo.id === id && todo.user === userId);
   if (!todo) return null;
   todo.isCompleted = isCompleted;
   if (todo.isCompleted) {
     todo.completedAt = new Date();
+  } else {
+    todo.completedAt = null;
   }
+  await writeTodos(todos);
   return todo;
 }
 
-export function deleteTodo(id: number): ITodo | null {
-  const todo = todos.find((todo) => todo.id === id);
+export async function deleteTodo(id: UUID, userId: UUID) {
+  const todos = await getTodosFromFile();
+  const todo = todos.find((todo) => todo.id === id && todo.user === userId);
   const remaining = todos.filter((todo) => todo.id !== id);
   if (!todo) return null;
   todos.length = 0;
   todos.push(...remaining);
   return todo;
+}
+
+async function getTodosFromFile() {
+  try {
+    const usersData = await fs.readFile(pathToTodos, "utf8");
+    const parsedData: ITodo[] = JSON.parse(usersData);
+    return parsedData;
+  } catch (error) {
+    throw new Error("Error reading user data");
+  }
+}
+
+async function writeTodos(todos: ITodo[]) {
+  try {
+    const data = JSON.stringify(todos, null, 2);
+    await fs.writeFile(pathToTodos, data, "utf8");
+  } catch (error) {
+    throw new Error("Internal Error");
+  }
 }

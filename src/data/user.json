@@ -1,0 +1,9 @@
+[
+  {
+    "id": "f53bc853-16ae-4f56-bf55-e63e3b9ebc45",
+    "name": "John Doe",
+    "email": "john@email.com",
+    "password": "$2a$10$8XyazIUkHL7RlmrxxSiRw.I/0SIO6jLRyJrLSyfO.z3xS0o8g7gmu",
+    "permissions": []
+  }
+]

@@ -1,20 +1,25 @@
+import { UUID } from "../types/types";
 import { ITodo } from "../interface/todo";
 import * as TodoModel from "../models/Todo";
-import { getTodoId } from "../utils/getId";
+import { getUUID } from "../utils/getUUID";
+import { BaseError } from "../errors";
 
-export function getTodos() {
-  return TodoModel.getTodos();
+export async function getTodos(userId: UUID) {
+  return (await TodoModel.getTodos(userId)).filter(
+    (todo) => todo.id === userId,
+  );
 }
 
-export function createTodo(task: string) {
+export async function createTodo(task: string, userId: UUID) {
   const todo: ITodo = {
-    id: getTodoId(),
+    id: getUUID(),
     task,
+    user: userId,
     createdAt: new Date(),
     isCompleted: false,
     completedAt: null,
   };
-  const data = TodoModel.createTodo(todo);
+  const data = await TodoModel.createTodo(todo);
   if (data) {
     return {
       message: "Todo created successfully",
@@ -28,36 +33,34 @@ export function createTodo(task: string) {
   }
 }
 
-export function updateTodo(
-  id: number,
+export async function updateTodo(
+  id: UUID,
   query: string,
+  user: UUID,
   task?: string,
   isCompleted?: boolean,
-): { message: string; data: ITodo | null } {
+): Promise<ITodo> {
   let data: ITodo | null = null;
   if (query === "status" && typeof isCompleted === "boolean") {
-    data = TodoModel.updateTodoStatus(id, isCompleted);
+    data = await TodoModel.updateTodoStatus(id, isCompleted, user);
   } else if (query === "task" && typeof task === "string") {
-    data = TodoModel.updateTodo(id, task);
+    data = await TodoModel.updateTodo(id, task, user);
   }
   if (data) {
-    return {
-      message: "Update Sucessfull",
-      data,
-    };
+    return data;
   } else {
-    return {
-      message: "Update Failed",
-      data,
-    };
+    throw new BaseError("Failed to update Todo");
   }
 }
 
-export function deleteTodo(id: number): {
+export async function deleteTodo(
+  id: UUID,
+  userId: UUID,
+): Promise<{
   message: string;
   data: ITodo | null;
-} {
-  const data = TodoModel.deleteTodo(id);
+}> {
+  const data = await TodoModel.deleteTodo(id, userId);
   if (data) {
     return {
       message: "Successfully deleted",

@@ -1,5 +1,8 @@
+import { UUID } from "../types/types";
+
 export interface ITodo {
-  id: number;
+  id: UUID;
+  user: UUID;
   task: string;
   isCompleted: boolean;
   createdAt: Date;
