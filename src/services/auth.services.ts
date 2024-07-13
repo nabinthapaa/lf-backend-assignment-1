@@ -1,11 +1,23 @@
-import config from "../config";
-import { BadRequestError, BaseError, UnauthenticatedError } from "../errors";
-import { IUser } from "../interface/user";
-import { getUserByEmail } from "./user";
 import bcrypt from "bcryptjs";
 import { sign } from "jsonwebtoken";
+import config from "../config";
+import { BadRequestError, BaseError, UnauthenticatedError } from "../errors";
+import { AuthResponse } from "../interface/auth";
+import { IUser } from "../interface/user";
+import { getUserByEmail } from "./user.services";
 
-export async function login(data: Pick<IUser, "email" | "password">) {
+/**
+ * Logs in the user based on email and id provided
+ *
+ * @param {Pick<IUser, "email" | "password">} data - Data of user logging in
+ * @returns  {Promise<AuthResponse>} - access token and refresh token
+ * @throws {BadRequestError} - Invalid email
+ * @throws {UnauthenticatedError} - Invalid password
+ * @throws {BaseError} - if environment variables not found
+ */
+export async function login(
+  data: Pick<IUser, "email" | "password">,
+): Promise<AuthResponse> {
   const existingUser = await getUserByEmail(data.email);
 
   if (!existingUser) {
@@ -42,6 +54,5 @@ export async function login(data: Pick<IUser, "email" | "password">) {
   return {
     accessToken,
     refreshToken,
-    payload,
   };
 }

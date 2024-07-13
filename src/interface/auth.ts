@@ -11,3 +11,8 @@ export interface Request<
 > extends ExpressRequest<P, ResBody, ReqBody, ReqQuery, Locals> {
   user?: Omit<IUser, "password">;
 }
+
+export interface AuthResponse {
+  accessToken: string;
+  refreshToken: string;
+}

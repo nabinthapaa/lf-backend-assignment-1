@@ -1,22 +1,22 @@
 import express from "express";
 import {
-  getUserInfo,
   createUser,
-  updateUser,
   deleteUser,
-} from "../controller/user";
-import { routeHandler, requestWrapper } from "../utils/requestWrapper";
+  getUserInfo,
+  updateUser,
+} from "../controller/user.controller";
 import { authenticate } from "../middleware/authenticate";
 import { authorize } from "../middleware/authorize";
 import {
-  validateRequestQuery,
   validateRequestBody,
+  validateRequestQuery,
 } from "../middleware/validator";
 import {
   createUserBodySchema,
   getUserQuerySchema,
   updateUserSchema,
-} from "../schema/user";
+} from "../schema/user.schema";
+import { routeHandler } from "../utils/requestWrapper";
 
 const router = express();
 
