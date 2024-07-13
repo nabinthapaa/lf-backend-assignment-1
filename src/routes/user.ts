@@ -8,7 +8,10 @@ import {
 import { routeHandler, requestWrapper } from "../utils/requestWrapper";
 import { authenticate } from "../middleware/authenticate";
 import { authorize } from "../middleware/authorize";
-import { validateUserQuery, validateUserBody } from "../middleware/validator";
+import {
+  validateRequestQuery,
+  validateRequestBody,
+} from "../middleware/validator";
 import {
   createUserBodySchema,
   getUserQuerySchema,
@@ -19,14 +22,14 @@ const router = express();
 
 router.post(
   "/",
-  routeHandler([validateUserBody(createUserBodySchema), createUser]),
+  routeHandler([validateRequestBody(createUserBodySchema), createUser]),
 );
 router.get(
   "/",
   routeHandler([
     authenticate,
     authorize,
-    validateUserQuery(getUserQuerySchema),
+    validateRequestQuery(getUserQuerySchema),
     getUserInfo,
   ]),
 );
@@ -35,8 +38,8 @@ router.put(
   routeHandler([
     authenticate,
     authorize,
-    validateUserQuery(getUserQuerySchema),
-    validateUserBody(updateUserSchema),
+    validateRequestQuery(getUserQuerySchema),
+    validateRequestBody(updateUserSchema),
     updateUser,
   ]),
 );
@@ -45,7 +48,7 @@ router.delete(
   routeHandler([
     authenticate,
     authorize,
-    validateUserQuery(getUserQuerySchema),
+    validateRequestQuery(getUserQuerySchema),
     deleteUser,
   ]),
 );

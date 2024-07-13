@@ -1,9 +1,5 @@
 import Joi from "joi";
 
-export const getTodos = Joi.object().options({
-  stripUnknown: true,
-});
-
 export const queryTodo = Joi.object({
   id: Joi.string()
     .guid({
@@ -19,7 +15,7 @@ export const queryTodo = Joi.object({
   stripUnknown: true,
 });
 
-export const createTodo = Joi.object({
+export const createTodoSchema = Joi.object({
   task: Joi.string().required().messages({
     "string.empty": "Task is required",
   }),
@@ -27,16 +23,28 @@ export const createTodo = Joi.object({
   stripUnknown: true,
 });
 
-export const updateTodoTask = Joi.object({
-  task: Joi.string().required().messages({
-    "string.empty": "Please provide a task to update with",
+export const updateTodoQuerySchema = Joi.object({
+  update: Joi.string().valid("status", "task").required().messages({
+    "string.empty": "Update parameters not defined correctly",
   }),
 }).options({
   stripUnknown: true,
 });
 
-export const updateTodoStatus = Joi.object({
-  status: Joi.bool().default(false),
+export const updateTodoDataSchema = Joi.object({
+  update: updateTodoQuerySchema.extract("update"),
+  task: Joi.string().when("update", {
+    is: "task",
+    then: Joi.string().required().messages({
+      "string.empty": "Task is not provided to update",
+    }),
+  }),
+  isCompleted: Joi.bool().when("update", {
+    is: "status",
+    then: Joi.bool().required().messages({
+      "bool.base": "Failed to update the task status",
+    }),
+  }),
 }).options({
   stripUnknown: true,
 });

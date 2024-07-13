@@ -2,6 +2,7 @@ import { UUID } from "../types/types";
 import { ITodo } from "../interface/todo";
 import * as TodoModel from "../models/Todo";
 import { getUUID } from "../utils/getUUID";
+import { BaseError } from "../errors";
 
 export async function getTodos(userId: UUID) {
   return (await TodoModel.getTodos(userId)).filter(
@@ -38,7 +39,7 @@ export async function updateTodo(
   user: UUID,
   task?: string,
   isCompleted?: boolean,
-): Promise<{ message: string; data: ITodo | null }> {
+): Promise<ITodo> {
   let data: ITodo | null = null;
   if (query === "status" && typeof isCompleted === "boolean") {
     data = await TodoModel.updateTodoStatus(id, isCompleted, user);
@@ -46,15 +47,9 @@ export async function updateTodo(
     data = await TodoModel.updateTodo(id, task, user);
   }
   if (data) {
-    return {
-      message: "Update Sucessfull",
-      data,
-    };
+    return data;
   } else {
-    return {
-      message: "Update Failed",
-      data,
-    };
+    throw new BaseError("Failed to update Todo");
   }
 }
 

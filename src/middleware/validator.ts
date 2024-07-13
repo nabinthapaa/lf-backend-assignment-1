@@ -4,7 +4,7 @@ import { BadRequestError } from "../errors";
 import { Request } from "../interface/auth";
 import { IQueryUser, IUser } from "../interface/user";
 
-export function validateUserQuery(QueryFormat: Joi.ObjectSchema) {
+export function validateRequestQuery(QueryFormat: Joi.ObjectSchema) {
   return (
     req: Request<any, any, any, IQueryUser>,
     _: Response,
@@ -19,18 +19,38 @@ export function validateUserQuery(QueryFormat: Joi.ObjectSchema) {
   };
 }
 
-export function validateUserBody(QueryFormat: Joi.ObjectSchema) {
+export function validateRequestBody(QueryFormat: Joi.ObjectSchema) {
   return (
     req: Request<any, any, IUser, IQueryUser>,
     _: Response,
     __: NextFunction,
   ) => {
-    const { error, value } = QueryFormat.validate(req.body);
+    const { error, value } = QueryFormat.validate({
+      ...req.body,
+      ...req.params,
+      ...req.query,
+    });
 
     if (error) {
       throw new BadRequestError(error.message);
     }
 
     req.body = value;
+  };
+}
+
+export function validateRequestParams(QueryFormat: Joi.ObjectSchema) {
+  return (
+    req: Request<any, any, IUser, IQueryUser>,
+    _: Response,
+    __: NextFunction,
+  ) => {
+    const { error, value } = QueryFormat.validate(req.params);
+
+    if (error) {
+      throw new BadRequestError(error.message);
+    }
+
+    req.params = value;
   };
 }

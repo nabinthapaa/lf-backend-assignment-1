@@ -36,6 +36,8 @@ export async function updateTodoStatus(
   todo.isCompleted = isCompleted;
   if (todo.isCompleted) {
     todo.completedAt = new Date();
+  } else {
+    todo.completedAt = null;
   }
   await writeTodos(todos);
   return todo;

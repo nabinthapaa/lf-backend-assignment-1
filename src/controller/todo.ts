@@ -3,6 +3,7 @@ import { Response } from "express";
 import httpStatusCode from "http-status-codes";
 import { Request } from "../interface/auth";
 import * as TodoService from "../services/todo";
+import { BadRequestError, NotFoundError } from "../errors";
 
 export async function getTodos(req: Request, res: Response) {
   const { user } = req;
@@ -45,15 +46,10 @@ export async function updateTodo(req: Request<{ id?: UUID }>, res: Response) {
   const { id } = req.params;
   const { user } = req;
   if (!id) {
-    res.status(httpStatusCode.BAD_REQUEST).json({
-      error: "Id is required",
-    });
-    return;
+    throw new BadRequestError("Task id is not provided");
   }
   if (!user) {
-    return res.status(httpStatusCode.NOT_FOUND).json({
-      message: "User not found",
-    });
+    throw new BadRequestError("User not found");
   }
   const { id: userId } = user;
   const { query } = req;
@@ -65,11 +61,7 @@ export async function updateTodo(req: Request<{ id?: UUID }>, res: Response) {
     task,
     isCompleted,
   );
-  if (service_response.data) {
-    res.status(httpStatusCode.OK).json(service_response);
-  } else {
-    res.status(httpStatusCode.NOT_FOUND).json(service_response);
-  }
+  res.status(httpStatusCode.OK).json(service_response);
 }
 
 //@ts-ignore
