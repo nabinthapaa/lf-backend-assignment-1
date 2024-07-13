@@ -1,8 +1,9 @@
 import express from "express";
 import { login, refresh } from "../controller/auth";
+import { requestWrapper } from "../utils/requestWrapper";
 
 const router = express();
-router.post("/login", login);
-router.get("/refresh", refresh);
+router.post("/login", requestWrapper(login));
+router.get("/refresh", requestWrapper(refresh));
 
 export default router;

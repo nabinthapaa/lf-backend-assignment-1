@@ -7,3 +7,7 @@ export interface IUser {
   password: string;
   permissions: string[];
 }
+
+export interface IQueryUser {
+  id?: UUID;
+}

@@ -1,6 +1,7 @@
 FROM node:20-alpine3.20 
 
-RUN apk add --no-cache gcompat
+RUN apk add tzdata\ 
+  && ln -s /usr/share/zoneinfo/Europe/Brussels /etc/localtime
 
 WORKDIR /app
 

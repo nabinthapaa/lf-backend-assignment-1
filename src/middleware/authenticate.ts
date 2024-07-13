@@ -20,6 +20,7 @@ export function authenticate(req: Request, _: Response, __: NextFunction) {
 
   verify(token[1], config.jwt.secret!, (error, data) => {
     if (error) {
+      console.log("JWT Token", token[1]);
       throw new BaseError(error.message);
     }
 

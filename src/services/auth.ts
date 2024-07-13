@@ -1,4 +1,5 @@
 import config from "../config";
+import { BadRequestError, BaseError, UnauthenticatedError } from "../errors";
 import { IUser } from "../interface/user";
 import { getUserByEmail } from "./user";
 import bcrypt from "bcryptjs";
@@ -8,9 +9,7 @@ export async function login(data: Pick<IUser, "email" | "password">) {
   const existingUser = await getUserByEmail(data.email);
 
   if (!existingUser) {
-    return {
-      error: "Invalid email address",
-    };
+    throw new BadRequestError("Invalid email or password");
   }
 
   const isValidPassword = await bcrypt.compare(
@@ -19,9 +18,7 @@ export async function login(data: Pick<IUser, "email" | "password">) {
   );
 
   if (!isValidPassword) {
-    return {
-      error: "",
-    };
+    throw new UnauthenticatedError("Invalid Password");
   }
 
   const payload = {
@@ -32,9 +29,7 @@ export async function login(data: Pick<IUser, "email" | "password">) {
   };
 
   if (!config.jwt.secret) {
-    return {
-      error: "Internal Error. Contact tech support",
-    };
+    throw new BaseError("Internal Error. Contact tech support");
   }
   const accessToken = sign(payload, config.jwt.secret, {
     expiresIn: config.jwt.accessTokenExpiryMS,
@@ -47,5 +42,6 @@ export async function login(data: Pick<IUser, "email" | "password">) {
   return {
     accessToken,
     refreshToken,
+    payload,
   };
 }

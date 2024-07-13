@@ -49,8 +49,8 @@ export async function updateUser(
   req: Request<any, any, Partial<IUser>, Query>,
   res: Response,
 ) {
-  logger.info("Updating user");
   const { id } = req.query;
+  logger.info(`Updating user ${id}`);
   const { body } = req;
   if (!id) {
     throw new BadRequestError("Id is required");

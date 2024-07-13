@@ -6,6 +6,8 @@ import config from "../config";
 import loggerWithNameSpace from "../utils/logger";
 import { Request } from "../interface/auth";
 import httpStatusCode from "http-status-codes";
+import { BaseError, UnauthenticatedError } from "../errors";
+import { UnavailableService } from "../errors/UnavailableService";
 
 interface LoginInfo extends Pick<IUser, "email" | "password"> {}
 
@@ -13,52 +15,33 @@ const logger = loggerWithNameSpace("AuthController");
 
 export async function login(req: Request<any, any, LoginInfo>, res: Response) {
   const data = req.body;
-  try {
-    const service_response = await AuthService.login(data);
-    if (!service_response.error) {
-      return res.status(httpStatusCode.OK).json({
-        message: "Login successfull",
-        payload: service_response,
-      });
-    }
-
-    res.status(httpStatusCode.INTERNAL_SERVER_ERROR).json({
-      error: service_response.error || "Login failure internal error",
+  const service_response = await AuthService.login(data);
+  if (service_response) {
+    logger.info(`User with id ${service_response.payload.id} logged in`);
+    return res.status(httpStatusCode.OK).json({
+      accessToken: service_response.accessToken,
+      refrehToken: service_response.refreshToken,
     });
-  } catch (e) {
-    if (e instanceof Error) {
-      logger.error(`Error: ${e.message}`);
-      if (e.stack) logger.error(e.stack);
-      res.status(httpStatusCode.INTERNAL_SERVER_ERROR).json({
-        error: e.message,
-      });
-    }
   }
 }
 
 export async function refresh(req: Request, res: Response) {
-  logger.info(`${req.method}:  ${req.url}`);
   const { authorization } = req.headers;
 
   if (!authorization) {
-    return res.status(httpStatusCode.FORBIDDEN).json({
-      error: "Unauthorized",
-    });
+    throw new UnauthenticatedError();
   }
 
   const token = authorization.split(" ");
 
   if (token.length !== 2 || token[0] !== "Bearer") {
-    return res.status(httpStatusCode.SERVICE_UNAVAILABLE).json({
-      error: "Invalid method",
-    });
+    throw new UnavailableService();
   }
 
   verify(token[1], config.jwt.secret!, (error, data) => {
     if (error) {
-      res.status(httpStatusCode.INTERNAL_SERVER_ERROR).json({
-        error: error.message,
-      });
+      console.log(token[1]);
+      throw new BaseError(error.message);
     }
 
     if (typeof data !== "string" && data) {
