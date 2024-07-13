@@ -1,8 +1,8 @@
 import express from "express";
-import todoRouter from "./todo";
-import userRouter from "./user";
-import authRouter from "./auth";
-import adminRouter from "./admin";
+import adminRouter from "./admin.routes";
+import authRouter from "./auth.routes";
+import todoRouter from "./todo.routes";
+import userRouter from "./user.routes";
 
 const router = express();
 router.use("/auth", authRouter);

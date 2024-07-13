@@ -5,7 +5,16 @@ import { BaseError, UnauthenticatedError } from "../errors";
 import { Request } from "../interface/auth";
 import { IUser } from "../interface/user";
 
-export function authenticate(req: Request, _: Response, __: NextFunction) {
+/**
+ * Middleware function to authenticate requests using JWT token.
+ *
+ * @param {Request} req - The `Custom Request` inheriting express Request object.
+ * @param {Response} res - Response object (unused in this function).
+ * @param {NextFunction} next - NextFunction object (unused in this function).
+ * @throws {UnauthenticatedError} - If authorization header is missing or invalid.
+ * @throws {BaseError} - If there is an issue verifying the JWT token.
+ */
+export function authenticate(req: Request, res: Response, next: NextFunction) {
   const { authorization } = req.headers;
 
   if (!authorization) {

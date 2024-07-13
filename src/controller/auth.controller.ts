@@ -1,5 +1,5 @@
 import { Response } from "express";
-import * as AuthService from "../services/auth";
+import * as AuthService from "../services/auth.services";
 import { IUser } from "../interface/user";
 import { sign, verify } from "jsonwebtoken";
 import config from "../config";

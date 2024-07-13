@@ -4,9 +4,8 @@ import {
   deleteTodo,
   getTodos,
   updateTodo,
-} from "../controller/todo";
+} from "../controller/todo.controller";
 import { authenticate } from "../middleware/authenticate";
-import { routeHandler } from "../utils/requestWrapper";
 import {
   validateRequestBody,
   validateRequestParams,
@@ -15,9 +14,10 @@ import {
 import {
   createTodoSchema,
   queryTodo,
-  updateTodoQuerySchema,
   updateTodoDataSchema,
-} from "../schema/todo";
+  updateTodoQuerySchema,
+} from "../schema/todo.schema";
+import { routeHandler } from "../utils/requestWrapper";
 
 const router = express();
 

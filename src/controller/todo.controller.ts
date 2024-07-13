@@ -2,7 +2,7 @@ import { UUID } from "../types/types";
 import { Response } from "express";
 import httpStatusCode from "http-status-codes";
 import { Request } from "../interface/auth";
-import * as TodoService from "../services/todo";
+import * as TodoService from "../services/todo.services";
 import { BadRequestError, NotFoundError } from "../errors";
 
 export async function getTodos(req: Request, res: Response) {
