@@ -1,2 +1,26 @@
-[]
-
+[
+  {
+    "id": "22cc39db-1592-b9-4cb8-ab7bd345154",
+    "task": "New new task",
+    "user": "10aa685f-2abf-7fe8-833e-13e3b57e9f4",
+    "createdAt": "2024-07-13T07:14:08.239Z",
+    "isCompleted": false,
+    "completedAt": null
+  },
+  {
+    "id": "123c9725-5c9b-73a1-6fe-a1131785d5d",
+    "task": "New new task",
+    "user": "10aa685f-2abf-7fe8-833e-13e3b57e9f4",
+    "createdAt": "2024-07-13T07:17:56.276Z",
+    "isCompleted": true,
+    "completedAt": "2024-07-13T07:17:56.370Z"
+  },
+  {
+    "id": "1762b257-7fe3-d4e-5652-5a97a00deb0",
+    "task": "New new task",
+    "user": "10aa685f-2abf-7fe8-833e-13e3b57e9f4",
+    "createdAt": "2024-07-13T07:18:35.599Z",
+    "isCompleted": true,
+    "completedAt": "2024-07-13T07:18:35.694Z"
+  }
+]

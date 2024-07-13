@@ -19,11 +19,17 @@ export async function getUserInfo(
 ) {
   logger.info("Getting user information");
   const { id } = req.query;
-  if (!id) throw new BadRequestError("Id is required");
-
-  const data = await UserService.getUserInfo(id);
-  logger.info("Retrived user information");
-  return res.status(httpStatusCode.OK).json(data);
+  if (!id) {
+    throw new BadRequestError("Id is required");
+  } else {
+    const data = await UserService.getUserInfo(id);
+    if (res.headersSent) {
+      logger.warn(`Header Sent: ${res.headersSent}. terminating`);
+      return;
+    }
+    logger.info(`Retrived user information: ${id}`);
+    return res.status(httpStatusCode.OK).json(data);
+  }
 }
 
 export async function createUser(req: Request<any, any, IUser>, res: Response) {
@@ -31,16 +37,12 @@ export async function createUser(req: Request<any, any, IUser>, res: Response) {
   const { body } = req;
   const { email, password, name } = body;
   if (!email || !password || !name) {
-    return res.status(httpStatusCode.BAD_REQUEST).json({
-      error: "All the required fields are not provided",
-    });
+    throw new BadRequestError("All the required fields are not provided");
+  } else {
+    const data = await UserService.createUser(body);
+    logger.info(`User created: ${data.id}`);
+    return res.status(httpStatusCode.OK).json(data);
   }
-  const data = await UserService.createUser(body);
-  logger.info(`User created: ${data.id}`);
-  return res.status(httpStatusCode.OK).json({
-    message: "User created Successfully",
-    data,
-  });
 }
 
 export async function updateUser(
@@ -52,10 +54,11 @@ export async function updateUser(
   const { body } = req;
   if (!id) {
     throw new BadRequestError("Id is required");
+  } else {
+    const data = await UserService.updateUser(id, body);
+    logger.info(`User updated: ${id}`);
+    return res.status(httpStatusCode.OK).json(data);
   }
-  const data = await UserService.updateUser(id, body);
-  logger.info("User updated: ", id);
-  return res.status(httpStatusCode.OK).json(data);
 }
 
 export async function deleteUser(
@@ -69,5 +72,5 @@ export async function deleteUser(
   }
   let data = UserService.deleteUser(id);
   logger.info("Deleting user: ", id);
-  res.status(httpStatusCode.OK).json(data);
+  return res.status(httpStatusCode.OK).json(data);
 }

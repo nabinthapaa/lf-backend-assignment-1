@@ -3,6 +3,7 @@ import path from "path";
 import { BaseError } from "../errors/BaseError";
 import { IUser } from "../interface/user";
 import { UUID } from "../types/types";
+import { NotFoundError } from "../errors";
 
 const pathToUserData = path.join(__dirname, "../data/user.json");
 
@@ -14,13 +15,10 @@ export async function getUserInfo(id: UUID) {
   const parsed_data: IUser[] = await getUsersData();
   const user = parsed_data.find(({ id: userId }) => userId === id);
   if (user) {
-    return {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-    };
+    const { password, ...otherInfo } = user;
+    return otherInfo;
   }
-  return null;
+  throw new NotFoundError(`User with ${id} does not exits`);
 }
 
 export async function createUser(user: IUser) {
@@ -37,43 +35,29 @@ export async function createUser(user: IUser) {
 }
 
 export async function updateUser(id: UUID, data: Partial<IUser>) {
-  try {
-    const parsed_data: IUser[] = await getUsersData();
+  const parsed_data: IUser[] = await getUsersData();
 
-    const user = parsed_data.filter(({ id: userId }) => userId === id);
-    if (!user.length) {
-      return null;
-    }
-
-    const otherUsers = parsed_data.filter(({ id: userId }) => userId !== id);
-    otherUsers.push({
-      ...user[0],
-      ...data,
-    });
-
-    const updatedUser = otherUsers.filter(({ id: userId }) => userId === id);
-    await writeUserData(otherUsers);
-    return updatedUser;
-  } catch (e) {
-    if (e instanceof Error) {
-      throw new Error(e.message);
-    }
+  const user = parsed_data.filter(({ id: userId }) => userId === id);
+  if (!user.length) {
+    return null;
   }
+
+  const otherUsers = parsed_data.filter(({ id: userId }) => userId !== id);
+  otherUsers.push({
+    ...user[0],
+    ...data,
+  });
+
+  const updatedUser = otherUsers.filter(({ id: userId }) => userId === id);
+  await writeUserData(otherUsers);
+  return updatedUser;
 }
 
 export async function deleteUser(id: UUID) {
-  try {
-    const parsed_data = await getUsersData();
-    const filtered_users = parsed_data.filter(
-      ({ id: userId }) => userId !== id,
-    );
+  const parsed_data = await getUsersData();
+  const filtered_users = parsed_data.filter(({ id: userId }) => userId !== id);
 
-    await writeUserData(filtered_users);
-  } catch (e) {
-    if (e instanceof Error) {
-      throw new Error(e.message);
-    }
-  }
+  await writeUserData(filtered_users);
 }
 
 export async function getUserByEmail(email: string) {

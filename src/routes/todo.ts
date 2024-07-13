@@ -5,13 +5,14 @@ import {
   getTodos,
   updateTodo,
 } from "../controller/todo";
-import { auth } from "../middleware/auth";
+import { authenticate } from "../middleware/authenticate";
+import { routeHandler } from "../utils/requestWrapper";
 
 const router = express();
 
-router.get("/", auth, getTodos);
-router.post("/", auth, createTodo);
-router.put("/:id", auth, updateTodo);
-router.delete("/:id", auth, deleteTodo);
+router.get("/", routeHandler([authenticate, getTodos]));
+router.post("/", routeHandler([authenticate, createTodo]));
+router.put("/:id", routeHandler([authenticate, updateTodo]));
+router.delete("/:id", routeHandler([authenticate, deleteTodo]));
 
 export default router;

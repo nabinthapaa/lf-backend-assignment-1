@@ -14,9 +14,9 @@ export function NotFounnd(_: Request, res: Response) {
 
 export function genericErrorHandler(
   error: Error,
-  req: Request,
+  _: Request,
   res: Response,
-  next: NextFunction,
+  __: NextFunction,
 ) {
   if (error.stack) {
     logger.error(error.stack);

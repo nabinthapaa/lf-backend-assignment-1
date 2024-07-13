@@ -5,7 +5,7 @@ import { BaseError, UnauthenticatedError } from "../errors";
 import { Request } from "../interface/auth";
 import { IUser } from "../interface/user";
 
-export function auth(req: Request, _: Response, next: NextFunction) {
+export function authenticate(req: Request, _: Response, __: NextFunction) {
   const { authorization } = req.headers;
 
   if (!authorization) {
@@ -26,5 +26,4 @@ export function auth(req: Request, _: Response, next: NextFunction) {
     if (typeof data !== "string" && data)
       req.user = data as Omit<IUser, "password">;
   });
-  next();
 }

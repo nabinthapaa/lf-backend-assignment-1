@@ -6,23 +6,26 @@ import {
   deleteUser,
   getUsers,
 } from "../controller/admin";
-import { auth } from "../middleware/auth";
+import { authenticate } from "../middleware/authenticate";
 import { authorize } from "../middleware/authorize";
 
 const router = express();
 
 router.post(
   "/user",
-  routeHandler([auth, authorize("users.create"), createUser]),
+  routeHandler([authenticate, authorize("users.create"), createUser]),
 );
-router.get("/user", routeHandler([auth, authorize("users.get"), getUsers]));
+router.get(
+  "/user",
+  routeHandler([authenticate, authorize("users.get"), getUsers]),
+);
 router.put(
   "/user",
-  routeHandler([auth, authorize("users.update"), updateUser]),
+  routeHandler([authenticate, authorize("users.update"), updateUser]),
 );
 router.delete(
   "/user",
-  routeHandler([auth, authorize("users.delete"), deleteUser]),
+  routeHandler([authenticate, authorize("users.delete"), deleteUser]),
 );
 
 export default router;

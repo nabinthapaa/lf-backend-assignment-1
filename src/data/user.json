@@ -3,6 +3,7 @@
     "id": "10aa685f-2abf-7fe8-833e-13e3b57e9f4",
     "name": "John Doe",
     "email": "john@email.com",
-    "password": "$2a$10$TyEQAe./rmcTwQxAX4Yt2OW1y5oE2qXGtcSpmmeT3PpMoXmyR7mLS"
+    "password": "$2a$10$TyEQAe./rmcTwQxAX4Yt2OW1y5oE2qXGtcSpmmeT3PpMoXmyR7mLS",
+    "permissions": []
   }
 ]

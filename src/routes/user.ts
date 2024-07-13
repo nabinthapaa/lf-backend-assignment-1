@@ -6,14 +6,14 @@ import {
   deleteUser,
 } from "../controller/user";
 import { routeHandler, requestWrapper } from "../utils/requestWrapper";
-import { auth } from "../middleware/auth";
+import { authenticate } from "../middleware/authenticate";
 import { authorize } from "../middleware/authorize";
 
 const router = express();
 
 router.post("/", routeHandler([createUser]));
-router.get("/", routeHandler([auth, authorize("id"), getUserInfo]));
-router.put("/", routeHandler([auth, authorize("id"), updateUser]));
-router.delete("/", routeHandler([auth, authorize("id"), deleteUser]));
+router.get("/", routeHandler([authenticate, authorize, getUserInfo]));
+router.put("/", routeHandler([authenticate, authorize, updateUser]));
+router.delete("/", routeHandler([authenticate, authorize, deleteUser]));
 
 export default router;

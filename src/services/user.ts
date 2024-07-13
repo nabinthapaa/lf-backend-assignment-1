@@ -1,11 +1,10 @@
-import { UUID } from "../types/types";
+import bcrypt from "bcryptjs";
+import { BaseError } from "../errors/BaseError";
+import { NotFoundError } from "../errors/NotFoundError";
 import { IUser } from "../interface/user";
 import * as UserModel from "../models/User";
+import { UUID } from "../types/types";
 import { getUUID } from "../utils/getUUID";
-import bcrypt from "bcryptjs";
-import { NotFoundError } from "../errors/NotFoundError";
-import { BaseError } from "../errors/BaseError";
-import { permission } from "process";
 
 export async function getUserInfo(id: UUID) {
   const data = await UserModel.getUserInfo(id);
@@ -35,7 +34,8 @@ export async function updateUser(id: UUID, data: Partial<IUser>) {
   if (email) dataToUpdate.email = email;
   // TODO: Change password only after comparing current password
   if (password) dataToUpdate.password = await bcrypt.hash(password, 10);
-  return await UserModel.updateUser(id, dataToUpdate);
+  const updatedUser = await UserModel.updateUser(id, dataToUpdate);
+  return updatedUser;
 }
 
 export async function deleteUser(id: UUID) {
