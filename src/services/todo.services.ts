@@ -1,4 +1,4 @@
-import { BaseError } from "../errors";
+import { BaseError, EncryptionError } from "../errors";
 import { ITodo } from "../interface/todo";
 import * as TodoModel from "../models/Todo.model";
 import { UUID } from "../types/types";
@@ -10,9 +10,10 @@ import { getUUID } from "../utils/getUUID";
  * @returns {Promise<ITodo[]>} - A promise that resolves to an array of todos belonging to the user.
  */
 export async function getTodos(userId: UUID): Promise<ITodo[]> {
-  return (await TodoModel.getTodos(userId)).filter(
-    (todo) => todo.id === userId,
-  );
+  if (!userId) {
+    throw new EncryptionError(`No user id provided`);
+  }
+  return await TodoModel.getTodos(userId);
 }
 
 /**
@@ -24,6 +25,12 @@ export async function getTodos(userId: UUID): Promise<ITodo[]> {
  * @throws {BaseError} - If creating the todo fails.
  */
 export async function createTodo(task: string, userId: UUID): Promise<ITodo> {
+  if (!task) {
+    throw new EncryptionError(`No task provided`);
+  }
+  if (!userId) {
+    throw new EncryptionError(`No User information provided`);
+  }
   const todo: ITodo = {
     id: getUUID(),
     task,
@@ -66,7 +73,7 @@ export async function updateTodo(
   if (data) {
     return data;
   }
-  throw new BaseError("Failed to update Todo");
+  throw new BaseError("Failed to update todo");
 }
 
 /**

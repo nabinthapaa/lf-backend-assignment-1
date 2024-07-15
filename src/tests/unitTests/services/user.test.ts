@@ -7,6 +7,7 @@ import { IUser } from "../../../interface/user";
 import * as UserModel from "../../../models/User.model";
 import {
   createUser,
+  deleteUser,
   getUserByEmail,
   getUserById,
   updateUser,
@@ -24,8 +25,9 @@ describe("User service unit test suite", () => {
     userModelCreateuserStub: Sinon.SinonStub,
     getUUIDStub: Sinon.SinonStub,
     userModelGetUserByEmailStub: Sinon.SinonStub,
-    userModelGetUserByIdStub: Sinon.SinonStub;
-  describe("Create User", () => {
+    userModelGetUserByIdStub: Sinon.SinonStub,
+    userModelDeleteUserStub: Sinon.SinonStub;
+  describe("User:Service => Create User", () => {
     beforeEach(() => {
       userModelGetUserByEmailStub = Sinon.stub(UserModel, "getUserByEmail");
       bcryptHashStub = Sinon.stub(bcrypt, "hash");
@@ -68,7 +70,7 @@ describe("User service unit test suite", () => {
       ]);
     });
   });
-  describe("Get User by id", () => {
+  describe("User:Service => Get user by id", () => {
     beforeEach(() => {
       userModelGetUserByIdStub = Sinon.stub(UserModel, "getUserById");
     });
@@ -96,7 +98,7 @@ describe("User service unit test suite", () => {
     });
   });
 
-  describe("Get User by email", () => {
+  describe("User:Service => Get User by email", () => {
     beforeEach(() => {
       userModelGetUserByEmailStub = Sinon.stub(UserModel, "getUserByEmail");
       userModelGetUserByIdStub = Sinon.stub(UserModel, "getUserById");
@@ -127,7 +129,7 @@ describe("User service unit test suite", () => {
       );
     });
   });
-  describe("Update user", () => {
+  describe("User:Service => Update user", () => {
     let password: string,
       newEmail: string,
       newName: string,
@@ -262,6 +264,24 @@ describe("User service unit test suite", () => {
           password: "hashedPassword",
         },
       ]);
+    });
+  });
+  describe("User:Service =>  Delete user", () => {
+    beforeEach(() => {
+      userModelDeleteUserStub = Sinon.stub(UserModel, "deleteUser");
+    });
+    afterEach(() => {
+      userModelDeleteUserStub.restore();
+    });
+
+    it("Should return successfully deleted message", async () => {
+      userModelDeleteUserStub.resolves({
+        message: "User deleted Successfully",
+      });
+      const userId = "8a2e7bab-8c4f-458e-896b-3d5e5ebee42e";
+      await expect(deleteUser(userId)).resolves.toStrictEqual({
+        message: "User deleted Successfully",
+      });
     });
   });
 });

@@ -38,7 +38,7 @@ export async function createUser(
  * @returns {Promise<Omit<IUser, "password">>} - newly created user
  */
 export async function updateUser(
-  user: IUser,
+  user: Partial<IUser>,
 ): Promise<Omit<IUser, "password">> {
   const { id, ...otherUserInfo } = user;
   return await UserService.updateUser(user.id, { ...otherUserInfo });
@@ -50,6 +50,6 @@ export async function updateUser(
  * @param {UUID} userId - id of user to delete
  * @returns  {Promise<void>}
  */
-export async function deleteUser(userId: UUID): Promise<void> {
-  await UserService.deleteUser(userId);
+export async function deleteUser(userId: UUID): Promise<{ message: string }> {
+  return await UserService.deleteUser(userId);
 }

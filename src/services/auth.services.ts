@@ -30,7 +30,7 @@ export async function login(
   );
 
   if (!isValidPassword) {
-    throw new UnauthenticatedError("Invalid Password");
+    throw new UnauthenticatedError("Invalid password");
   }
 
   const payload = {

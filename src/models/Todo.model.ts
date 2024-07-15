@@ -30,7 +30,7 @@ export async function createTodo(todo: ITodo): Promise<ITodo> {
   todos.push(todo);
   const dataToWrite = JSON.stringify(todos, null, 2);
   await writeContentsToFile(dataToWrite, pathToTodos);
-  return todo;
+  return todos.find(({ id: todoId }) => todoId === todo.id);
 }
 
 /**
