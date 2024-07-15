@@ -8,38 +8,21 @@ import { BadRequestError, NotFoundError } from "../errors";
 export async function getTodos(req: Request, res: Response) {
   const { user } = req;
   if (!user) {
-    return res.status(httpStatusCode.NOT_FOUND).json({
-      message: "User not found",
-    });
+    throw new NotFoundError(`User not found`);
   }
   const data = await TodoService.getTodos(user.id);
-  if (!data) {
-    res.status(httpStatusCode.NOT_FOUND).json({
-      message: "No todos found",
-    });
-  } else {
-    res.status(httpStatusCode.OK).json([...data]);
-  }
+  return res.status(httpStatusCode.OK).json([...data]);
 }
 
 export async function createTodo(req: Request, res: Response) {
   const { body } = req;
   if (!req.body.task) {
-    res.status(httpStatusCode.BAD_REQUEST).json({
-      message: "Task is missing. Couldn't create a Todo",
-    });
+    throw new BadRequestError("Task is required");
   }
   const { task } = body;
   const { user } = req;
-  const service_response = await TodoService.createTodo(
-    task as string,
-    user?.id!,
-  );
-  if (service_response.data) {
-    res.status(httpStatusCode.OK).json(service_response);
-  } else {
-    res.status(httpStatusCode.NOT_FOUND).json(service_response);
-  }
+  const data = await TodoService.createTodo(task as string, user?.id!);
+  return res.status(httpStatusCode.OK).json(data);
 }
 
 export async function updateTodo(req: Request<{ id?: UUID }>, res: Response) {
@@ -61,27 +44,18 @@ export async function updateTodo(req: Request<{ id?: UUID }>, res: Response) {
     task,
     isCompleted,
   );
-  res.status(httpStatusCode.OK).json(service_response);
+  return res.status(httpStatusCode.OK).json(service_response);
 }
 
-//@ts-ignore
 export async function deleteTodo(req: Request<{ id?: UUID }>, res: Response) {
   const { id } = req.params;
   const { user } = req;
   if (!id) {
-    return res.status(httpStatusCode.BAD_REQUEST).json({
-      error: "Id is required",
-    });
+    throw new BadRequestError("Id is required for deletion");
   }
   if (!user) {
-    return res.status(httpStatusCode.NOT_FOUND).json({
-      message: "User not found",
-    });
+    throw new NotFoundError(`User not found`);
   }
-  const service_response = await TodoService.deleteTodo(id, user.id);
-  if (service_response.data) {
-    res.status(httpStatusCode.OK).json(service_response);
-  } else {
-    res.status(httpStatusCode.NOT_FOUND).json(service_response);
-  }
+  const data = await TodoService.deleteTodo(id, user.id);
+  return res.status(httpStatusCode.OK).json(data);
 }

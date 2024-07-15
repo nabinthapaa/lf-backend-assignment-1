@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import { NotFoundError } from "../errors";
+import { EncryptionError, NotFoundError, UserExistsError } from "../errors";
 import { IUser } from "../interface/user";
 import * as UserModel from "../models/User.model";
 import { UUID } from "../types/types";
@@ -12,7 +12,7 @@ import { getUUID } from "../utils/getUUID";
  * @returns {Promise<Omit<IUser, "password">> } - details of user.
  * @throws {NotFoundError} - If user with `id` not found.
  */
-export async function getUserInfo(id: UUID): Promise<Omit<IUser, "password">> {
+export async function getUserById(id: UUID): Promise<Omit<IUser, "password">> {
   const data = await UserModel.getUserById(id);
   if (!data) {
     throw new NotFoundError(`User with ${id} not found`);
@@ -27,8 +27,12 @@ export async function getUserInfo(id: UUID): Promise<Omit<IUser, "password">> {
  * @returns {Promise<Omit<IUser, "password">>} - newly created user
  */
 export async function createUser(
-  user: IUser,
+  user: Omit<IUser, "id">,
 ): Promise<Omit<IUser, "password">> {
+  const existingUser = await UserModel.getUserByEmail(user.email);
+  if (existingUser) {
+    throw new UserExistsError(`User with ${user.email} already exists`);
+  }
   const hashedPassword = await bcrypt.hash(user.password, 10);
   const hashedUser = {
     id: getUUID(),
@@ -53,10 +57,16 @@ export async function updateUser(
   data: Partial<IUser>,
 ): Promise<Omit<IUser, "password">> {
   const { name, email, password } = data;
+  if (!name && !email && !password) {
+    throw new EncryptionError(`No data provided to update`);
+  }
+  const existingUser = getUserById(id);
+  if (!existingUser) {
+    throw new NotFoundError(`User with ${id} not found`);
+  }
   const dataToUpdate: Partial<IUser> = {};
   if (name) dataToUpdate.name = name;
   if (email) dataToUpdate.email = email;
-  // TODO: Change password only after comparing current password
   if (password) dataToUpdate.password = await bcrypt.hash(password, 10);
   const updatedUser = await UserModel.updateUser(id, dataToUpdate);
   return updatedUser;
@@ -83,6 +93,9 @@ export async function deleteUser(id: UUID): Promise<{ message: string }> {
  */
 export async function getUserByEmail(email: string): Promise<IUser> {
   const data = await UserModel.getUserByEmail(email);
+  if (!data) {
+    throw new NotFoundError(`User with ${email} not found`);
+  }
   return data;
 }
 

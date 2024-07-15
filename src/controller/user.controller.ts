@@ -20,7 +20,7 @@ export async function getUserInfo(
 ) {
   const { id } = req.query;
   logger.info(`Getting user information: ${id}`);
-  const data = await UserService.getUserInfo(id!);
+  const data = await UserService.getUserById(id!);
   if (res.headersSent) {
     logger.warn(`Header Sent: ${res.headersSent}. terminating`);
     return;

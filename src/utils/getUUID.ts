@@ -4,7 +4,7 @@ import { UUID } from "../types/types";
  * ### Generate a psuedo-random UUID V4
  *
  * UUID V4 format:
- * `xxxxxxxx-4xxx-yxxx-xxxxxxxxxxxx`
+ * `xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx`
  * * `x` is a random hexadecimal number.
  * * `4` represent the uuid version.
  * * `y` value can only be `8`, `9`, `A`, `B`.

@@ -8,10 +8,8 @@ services:
       - JWT_SECRET=${JWT_SECRET}
     ports:
       - ${PORT}:8000
-    restart: always
     command: >
       sh -c "ln -snf /usr/share/zoneinfo/${TIME_ZONE} /etc/localtime && 
-      echo ${TIME_ZONE} > /etc/timezone &&
-      npm run dev"
+      echo ${TIME_ZONE} > /etc/timezone && npm run dev"
     volumes:
       - .:/app

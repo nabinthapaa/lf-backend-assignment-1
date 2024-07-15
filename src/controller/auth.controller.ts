@@ -7,7 +7,7 @@ import loggerWithNameSpace from "../utils/logger";
 import { Request } from "../interface/auth";
 import httpStatusCode from "http-status-codes";
 import { BaseError, UnauthenticatedError } from "../errors";
-import { UnavailableService } from "../errors/UnavailableService";
+import { UnavailableServiceError } from "../errors";
 
 interface LoginInfo extends Pick<IUser, "email" | "password"> {}
 
@@ -20,7 +20,7 @@ export async function login(req: Request<any, any, LoginInfo>, res: Response) {
     logger.info(`User with id ${service_response.payload.id} logged in`);
     return res.status(httpStatusCode.OK).json({
       accessToken: service_response.accessToken,
-      refrehToken: service_response.refreshToken,
+      refreshToken: service_response.refreshToken,
     });
   }
 }
@@ -35,7 +35,7 @@ export async function refresh(req: Request, res: Response) {
   const token = authorization.split(" ");
 
   if (token.length !== 2 || token[0] !== "Bearer") {
-    throw new UnavailableService();
+    throw new UnavailableServiceError();
   }
 
   verify(token[1], config.jwt.secret!, (error, data) => {

@@ -15,4 +15,5 @@ export interface Request<
 export interface AuthResponse {
   accessToken: string;
   refreshToken: string;
+  payload: Omit<IUser, "password">;
 }

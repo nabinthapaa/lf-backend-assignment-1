@@ -54,5 +54,6 @@ export async function login(
   return {
     accessToken,
     refreshToken,
+    payload,
   };
 }

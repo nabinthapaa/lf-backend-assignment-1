@@ -13,7 +13,7 @@ export async function getUser(
   id?: UUID | undefined,
 ): Promise<Omit<IUser, "password"> | IUser[]> {
   if (id) {
-    return await UserService.getUserInfo(id);
+    return await UserService.getUserById(id);
   } else {
     return await UserService.getAllUsers();
   }

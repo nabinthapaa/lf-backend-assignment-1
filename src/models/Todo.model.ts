@@ -27,6 +27,7 @@ export async function getTodos(userId: UUID): Promise<ITodo[]> {
 export async function createTodo(todo: ITodo): Promise<ITodo> {
   let fileContents = await getFileContents(pathToTodos);
   let todos = JSON.parse(fileContents) as ITodo[];
+  todos.push(todo);
   const dataToWrite = JSON.stringify(todos, null, 2);
   await writeContentsToFile(dataToWrite, pathToTodos);
   return todo;

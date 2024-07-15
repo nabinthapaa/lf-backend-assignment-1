@@ -30,7 +30,7 @@ export async function getUserById(id: UUID): Promise<Omit<IUser, "password">> {
     const { password, ...otherInfo } = user;
     return otherInfo;
   }
-  throw new NotFoundError(`User with ${id} does not exits`);
+  return null;
 }
 
 /**
@@ -44,9 +44,6 @@ export async function getUserByEmail(email: string): Promise<IUser> {
   const fileContents = await getFileContents(pathToUserData);
   const userData = JSON.parse(fileContents) as IUser[];
   const user = userData.find(({ email: userEmail }) => userEmail === email);
-  if (!user) {
-    throw new NotFoundError(`User with ${email} not found`);
-  }
   return user;
 }
 
@@ -62,14 +59,8 @@ export async function createUser(
 ): Promise<Omit<IUser, "password">> {
   const fileContents = await getFileContents(pathToUserData);
   const userData = JSON.parse(fileContents) as IUser[];
-
-  const userExists = userData.find(({ email }) => email === user.email);
-  if (userExists) {
-    throw new UserExistsError(`User with ${user.email} already exists`);
-  }
   userData.push(user);
-
-  const dataToWrite = JSON.stringify(userData);
+  const dataToWrite = JSON.stringify(userData, null, 2);
   await writeContentsToFile(dataToWrite, pathToUserData);
 
   const { password, ...otherInfo } = user;
@@ -92,16 +83,13 @@ export async function updateUser(
   const userData = JSON.parse(fileContents) as IUser[];
 
   const userIndex = userData.findIndex(({ id: userId }) => userId === id);
-  if (userIndex === -1) {
-    throw new NotFoundError(`User with ${id} not found`);
-  }
 
   userData[userIndex] = {
     ...userData[userIndex],
     ...data,
   };
 
-  const dataToWrite = JSON.stringify(userData);
+  const dataToWrite = JSON.stringify(userData, null, 2);
   await writeContentsToFile(dataToWrite, pathToUserData);
   const { password, ...otherInfo } = userData[userIndex];
   return otherInfo;
@@ -118,6 +106,6 @@ export async function deleteUser(id: UUID): Promise<void> {
   const userData = JSON.parse(fileContents) as IUser[];
   const updatedUserData = userData.filter(({ id: userId }) => userId !== id);
 
-  const dataToWrite = JSON.stringify(updatedUserData);
+  const dataToWrite = JSON.stringify(updatedUserData, null, 2);
   await writeContentsToFile(dataToWrite, pathToUserData);
 }
