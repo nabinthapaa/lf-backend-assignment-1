@@ -13,3 +13,18 @@ services:
       echo ${TIME_ZONE} > /etc/timezone && npm run dev"
     volumes:
       - .:/app
+
+  database:
+    container_name: postgres_todo
+    image: postgres
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: always
+volumes:
+  postgres_data:

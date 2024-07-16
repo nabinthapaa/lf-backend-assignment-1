@@ -46,7 +46,7 @@ describe("Auth service unit test", () => {
         new UnauthenticatedError("Invalid password"),
       );
     });
-    it("Should throw error when password is not correct", async () => {
+    it("Should return payload, accessToken and refresh token", async () => {
       const { password, ...otherInfo } = fullUser;
       getUserByEmailStub.resolves({ ...otherInfo });
       bcryptCompareStub.resolves(true);
