@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import { EncryptionError, NotFoundError, UserExistsError } from "../errors";
 import { IUser } from "../interface/user";
-import * as UserModel from "../models/User.model";
+import { UserModel } from "../models/User.model";
 import { UUID } from "../types/types";
 import { getUUID } from "../utils/getUUID";
 
@@ -79,7 +79,7 @@ export async function updateUser(
  * @returns {Promise<{ message: string }>} - success message.
  */
 export async function deleteUser(id: UUID): Promise<{ message: string }> {
-  await UserModel.deleteUser(id);
+  UserModel.deleteUser(id);
   return {
     message: "User deleted Successfully",
   };

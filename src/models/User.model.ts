@@ -1,8 +1,138 @@
 import path from "path";
-import { NotFoundError, UserExistsError } from "../errors";
-import { IUser } from "../interface/user";
+import { IPermission, IUser } from "../interface/user";
 import { UUID } from "../types/types";
 import { getFileContents, writeContentsToFile } from "../utils/fileHandler";
+import { BaseModel } from "./Base.model";
+
+export class UserModel extends BaseModel {
+  static getUsers() {
+    return this.queryBuilder()
+      .select(
+        "name",
+        "email",
+        "users.id as id",
+        "permissions.permission as permissions",
+      )
+      .from("users")
+      .leftJoin("user_permisions", "user_permisions.user_id", "users.id")
+      .leftJoin("permissions", "user_permisions.permissions", "permissions.id");
+  }
+
+  static joinUserPermission(user: IUser[]): IUser {
+    return {
+      ...user[0],
+      permissions: user.flatMap(({ permissions }) => permissions),
+    };
+  }
+
+  static async getUserById(id: string): Promise<IUser> {
+    const user = await this.queryBuilder()
+      .select(
+        "name",
+        "email",
+        "users.id as id",
+        "permissions.permission as permissions",
+      )
+      .from<IUser>("users")
+      .leftJoin("user_permisions", "user_permisions.user_id", "users.id")
+      .leftJoin("permissions", "user_permisions.permissions", "permissions.id")
+      .where("users.id", "=", `${id}`);
+
+    return UserModel.joinUserPermission(user);
+  }
+
+  static async getUserByEmail(email: string): Promise<IUser> {
+    const user = await this.queryBuilder()
+      .select(
+        "name",
+        "email",
+        "users.id as id",
+        "permissions.permission as permissions",
+      )
+      .from("users")
+      .leftJoin("user_permisions", "user_permisions.user_id", "users.id")
+      .leftJoin("permissions", "user_permisions.permissions", "permissions.id")
+      .where("users.email", "=", `${email}`);
+
+    return {
+      ...user[0],
+      permissions: user.map(({ permissions }) => permissions),
+    };
+  }
+
+  static async createUser(user: IUser) {
+    const transaction = await UserModel.queryBuilder().transaction(
+      async (trx) => {
+        const { permissions, ...userData } = user;
+        trx.insert(userData).into("users");
+        if (permissions && permissions.length > 0) {
+          const permission_ids = await UserModel.getPermissionsId(permissions);
+          await Promise.all(
+            permission_ids.map((id) => {
+              trx
+                .insert({ user_id: user.id, permissions: id })
+                .into("user_permisions");
+            }),
+          );
+        }
+        return trx;
+      },
+    );
+    if (transaction.isCompleted) {
+      return UserModel.getUserById(user.id);
+    }
+  }
+
+  static async updateUser(id: string, user: Partial<IUser>): Promise<IUser> {
+    const transaction = await UserModel.queryBuilder().transaction(
+      async (trx) => {
+        const { permissions, ...userData } = user;
+        trx.update(userData).into("users").where({ id });
+        if (permissions && permissions.length > 0) {
+          const permission_ids: number[] =
+            await UserModel.getPermissionsId(permissions);
+          await Promise.all(
+            permission_ids.map(async (id) => {
+              const res = await UserModel.queryBuilder()
+                .select("*")
+                .from("user_permisions")
+                .where(`user_id='${user.id}' and permissions=${id}`);
+              if (!res.length) {
+                await trx.insert({
+                  user_id: user.id,
+                  permissions: id,
+                });
+              }
+            }),
+          );
+        }
+        return trx;
+      },
+    );
+
+    if (transaction.isCompleted) {
+      return UserModel.getUserById(id);
+    }
+  }
+
+  static deleteUser(id: string) {
+    UserModel.queryBuilder().delete().from("users").where({ id });
+  }
+
+  private static async getPermissionsId(
+    permissions: string[],
+  ): Promise<number[]> {
+    const permission_ids: number[][] = await Promise.all(
+      permissions.map((permission) => {
+        return UserModel.queryBuilder()
+          .select("id")
+          .from<IPermission>("permissions")
+          .where({ permission });
+      }),
+    );
+    return permission_ids[0];
+  }
+}
 
 const pathToUserData = path.join(__dirname, "../data/user.json");
 

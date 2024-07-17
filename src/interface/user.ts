@@ -11,3 +11,8 @@ export interface IUser {
 export interface IQueryUser {
   id?: UUID;
 }
+
+export interface IPermission {
+  id: number;
+  permission: string;
+}

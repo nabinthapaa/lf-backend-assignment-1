@@ -4,7 +4,7 @@ import expect from "expect";
 import Sinon from "sinon";
 import { EncryptionError, NotFoundError } from "../../../errors";
 import { IUser } from "../../../interface/user";
-import * as UserModel from "../../../models/User.model";
+import { UserModel } from "../../../models/User.model";
 import {
   createUser,
   deleteUser,

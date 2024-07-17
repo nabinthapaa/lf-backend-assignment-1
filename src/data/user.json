@@ -1,1 +1,9 @@
-[]
+[
+  {
+    "id": "f53bc853-16ae-4f56-bf55-e63e3b9ebc45",
+    "name": "John doe",
+    "email": "john@test.com",
+    "password": "hashedPassword",
+    "permissions": []
+  }
+]
