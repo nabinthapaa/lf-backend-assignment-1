@@ -37,5 +37,6 @@ function getRandomString(count: number): string {
  */
 function getVersionInfo(): string {
   const numberpool = [8, 9, 10, 11];
+  (((Math.random() * 16) | 0) & 0x3) | 0x8;
   return numberpool[(Math.random() * numberpool.length) | 0].toString(16);
 }

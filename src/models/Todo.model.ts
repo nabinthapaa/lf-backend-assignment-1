@@ -3,6 +3,91 @@ import { NotFoundError } from "../errors";
 import { ITodo } from "../interface/todo";
 import { UUID } from "../types/types";
 import { getFileContents, writeContentsToFile } from "../utils/fileHandler";
+import { BaseModel } from "./Base.model";
+
+export class TodoModel extends BaseModel {
+  static getTodos(userId: UUID): Promise<ITodo[]> {
+    return TodoModel.queryBuilder()
+      .select("*")
+      .from("todos")
+      .where({ created_by: userId });
+  }
+
+  static getTodoById(id: UUID): Promise<ITodo> {
+    return TodoModel.queryBuilder()
+      .select<ITodo>("*")
+      .from("todos")
+      .where({ id });
+  }
+
+  static async createTodo(todo: ITodo): Promise<ITodo> {
+    const transaction = await TodoModel.queryBuilder().transaction(
+      async (trx) => {
+        trx.insert(todo).into("todos");
+        return trx;
+      },
+    );
+    if (transaction.isCompleted) {
+      return TodoModel.getTodoById(todo.id);
+    }
+  }
+
+  static async deleteTodo(id: UUID): Promise<ITodo> {
+    const transaction = await TodoModel.queryBuilder().transaction(
+      async (trx) => {
+        trx.delete(id).from("todos");
+        return trx;
+      },
+    );
+    if (transaction.isCompleted) {
+      return TodoModel.getTodoById(id);
+    }
+  }
+
+  static async updateTodo(id: UUID, task: string): Promise<ITodo> {
+    const transaction = await TodoModel.queryBuilder().transaction(
+      async (trx) => {
+        trx.update("task", task).into("todos").where({ id });
+        return trx;
+      },
+    );
+
+    if (transaction.isCompleted) {
+      return TodoModel.getTodoById(id);
+    }
+  }
+
+  static async updateTodoStatus(
+    id: UUID,
+    isCompleted: boolean,
+    userId: UUID,
+  ): Promise<ITodo> {
+    const transaction = await TodoModel.queryBuilder().transaction(
+      async (trx) => {
+        trx
+          .update("isCompleted", isCompleted)
+          .into("todos")
+          .where({ id, created_by: userId });
+        if (isCompleted) {
+          trx
+            .update("completed_at", new Date())
+            .into("todos")
+            .where({ id, created_by: userId });
+        } else {
+          trx
+            .update("completed_at", null)
+            .into("todos")
+            .where({ id, created_by: userId });
+        }
+        return trx;
+      },
+    );
+
+    if (transaction.isCompleted) {
+      return TodoModel.getTodoById(id);
+    }
+  }
+}
 
 const pathToTodos = path.join(__dirname, "../data/todo.json");
 
