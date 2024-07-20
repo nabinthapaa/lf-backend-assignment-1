@@ -25,8 +25,8 @@ export class UserModel extends BaseModel {
     };
   }
 
-  static async getUserById(id: string): Promise<IUser> {
-    const user = await this.queryBuilder()
+  static async getUserById(id: UUID): Promise<IUser> {
+    const user = await UserModel.queryBuilder()
       .select(
         "name",
         "email",
@@ -34,9 +34,13 @@ export class UserModel extends BaseModel {
         "permissions.permission as permissions",
       )
       .from<IUser>("users")
-      .leftJoin("user_permisions", "user_permisions.user_id", "users.id")
-      .leftJoin("permissions", "user_permisions.permissions", "permissions.id")
+      .join("user_permisions", "user_permisions.user_id", "users.id")
+      .join("permissions", "user_permisions.permissions", "permissions.id")
       .where("users.id", "=", `${id}`);
+
+    if (!user.length) {
+      return null;
+    }
 
     return UserModel.joinUserPermission(user);
   }
@@ -48,11 +52,16 @@ export class UserModel extends BaseModel {
         "email",
         "users.id as id",
         "permissions.permission as permissions",
+        "password",
       )
       .from("users")
       .leftJoin("user_permisions", "user_permisions.user_id", "users.id")
       .leftJoin("permissions", "user_permisions.permissions", "permissions.id")
       .where("users.email", "=", `${email}`);
+
+    if (!user.length) {
+      return null;
+    }
 
     return {
       ...user[0],
@@ -60,34 +69,59 @@ export class UserModel extends BaseModel {
     };
   }
 
-  static async createUser(user: IUser) {
+  static async createUser(user: IUser, created_by: UUID) {
     const transaction = await UserModel.queryBuilder().transaction(
       async (trx) => {
         const { permissions, ...userData } = user;
-        trx.insert(userData).into("users");
+        // INFO: Insert User data in the table
+        const [userId] = await trx("users")
+          .insert({ ...userData, created_by })
+          .returning("id");
         if (permissions && permissions.length > 0) {
           const permission_ids = await UserModel.getPermissionsId(permissions);
+          // INFO: Insert User's permission data in the user_permission table
           await Promise.all(
-            permission_ids.map((id) => {
-              trx
-                .insert({ user_id: user.id, permissions: id })
-                .into("user_permisions");
+            permission_ids.map(async (id) => {
+              await trx("user_permisions").insert({
+                user_id: user.id,
+                permissions: id,
+              });
             }),
           );
         }
-        return trx;
+
+        const newUser = await trx("user")
+          .select(
+            "name",
+            "email",
+            "users.id as id",
+            "permissions.permission as permissions",
+          )
+          .from("users")
+          .leftJoin("user_permisions", "user_permisions.user_id", "users.id")
+          .leftJoin(
+            "permissions",
+            "user_permisions.permissions",
+            "permissions.id",
+          )
+          .where("users.id", "=", `${user.id}`);
+
+        return UserModel.joinUserPermission(newUser);
       },
     );
-    if (transaction.isCompleted) {
-      return UserModel.getUserById(user.id);
-    }
+
+    return transaction;
   }
 
   static async updateUser(id: string, user: Partial<IUser>): Promise<IUser> {
     const transaction = await UserModel.queryBuilder().transaction(
       async (trx) => {
         const { permissions, ...userData } = user;
-        trx.update(userData).into("users").where({ id });
+        const t = trx("users")
+          .update({ ...userData })
+          .where({ id });
+        console.log(t.toString());
+        await t;
         if (permissions && permissions.length > 0) {
           const permission_ids: number[] =
             await UserModel.getPermissionsId(permissions);
@@ -106,13 +140,27 @@ export class UserModel extends BaseModel {
             }),
           );
         }
-        return trx;
+        const newUser: IUser[] = await trx("user")
+          .select(
+            "name",
+            "email",
+            "users.id as id",
+            "permissions.permission as permissions",
+          )
+          .from<IUser>("users")
+          .leftJoin("user_permisions", "user_permisions.user_id", "users.id")
+          .leftJoin(
+            "permissions",
+            "user_permisions.permissions",
+            "permissions.id",
+          )
+          .where("users.id", "=", `${id}`);
+
+        return UserModel.joinUserPermission(newUser);
       },
     );
 
-    if (transaction.isCompleted) {
-      return UserModel.getUserById(id);
-    }
+    return transaction;
   }
 
   static deleteUser(id: string) {

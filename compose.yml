@@ -3,11 +3,9 @@ services:
     build: .
     container_name: todo_api_container
     # image: s0skai/lf-backend-todo:latest
-    environment:
-      - PORT=${PORT}
-      - JWT_SECRET=${JWT_SECRET}
+    env_file: ".env"
     ports:
-      - ${PORT}:8000
+      - 3000:${PORT}
     command: >
       sh -c "ln -snf /usr/share/zoneinfo/${TIME_ZONE} /etc/localtime && 
       echo ${TIME_ZONE} > /etc/timezone && npm run dev"
@@ -15,8 +13,8 @@ services:
       - .:/app
 
   database:
-    container_name: postgres_todo
     image: postgres
+    container_name: postgres_todo
     environment:
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}

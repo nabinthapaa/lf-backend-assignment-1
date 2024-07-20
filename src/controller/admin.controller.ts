@@ -10,9 +10,12 @@ export async function getUsers(req: Request, res: Response) {
 }
 
 export async function createUser(req: Request, res: Response) {
-  const data = await AdminService.createUser({
-    ...req.body,
-  });
+  const data = await AdminService.createUser(
+    {
+      ...req.body,
+    },
+    req.user.id,
+  );
   return res.status(httpsStatusCode.OK).json(data);
 }
 

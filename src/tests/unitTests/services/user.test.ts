@@ -51,16 +51,16 @@ describe("User service unit test suite", () => {
       bcryptHashStub.resolves("hashedPassword");
       await createUser(user as Omit<IUser, "id">);
 
-      // Ensure bcrypt.hash(),  getUUUID() and UserModel.createUser() are
+      // INFO: Ensure bcrypt.hash(),  getUUUID() and UserModel.createUser() are
       // called only once
       expect(bcryptHashStub.callCount).toBe(1);
       expect(getUUIDStub.callCount).toBe(1);
       expect(userModelCreateuserStub.callCount).toBe(1);
 
-      // Ensure arguments passed to bcrypt are user password with salt value of 10
+      // INFO: Ensure arguments passed to bcrypt are user password with salt value of 10
       expect(bcryptHashStub.getCall(0).args).toStrictEqual([user.password, 10]);
 
-      // Ensure arguments passed to UserModel.createUser is a proper user object
+      // INFO: Ensure arguments passed to UserModel.createUser is a proper user object
       expect(userModelCreateuserStub.getCall(0).args).toStrictEqual([
         {
           ...user,
@@ -149,12 +149,14 @@ describe("User service unit test suite", () => {
       userModelUpdateUserStub = Sinon.stub(UserModel, "updateUser");
       userModelCreateuserStub = Sinon.stub(UserModel, "createUser");
       getUUIDStub = Sinon.stub(utils, "getUUID");
+      userModelGetUserByEmailStub = Sinon.stub(UserModel, "getUserByEmail");
     });
     afterEach(() => {
       bcryptHashStub.restore();
       userModelUpdateUserStub.restore();
       userModelCreateuserStub.restore();
       getUUIDStub.restore();
+      userModelGetUserByEmailStub.restore();
     });
 
     it("Should update user email", async () => {
@@ -163,6 +165,7 @@ describe("User service unit test suite", () => {
         ...user,
         id,
       });
+      userModelGetUserByEmailStub.resolves(undefined);
       getUUIDStub.returns(id);
       bcryptHashStub.resolves("hashedPassword");
       const newUser = await createUser({ ...user, password } as IUser);

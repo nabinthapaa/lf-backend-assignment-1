@@ -27,8 +27,9 @@ export async function getUser(
  */
 export async function createUser(
   user: IUser,
+  creator: UUID,
 ): Promise<Omit<IUser, "password">> {
-  return await UserService.createUser(user);
+  return await UserService.createUser(user, creator);
 }
 
 /**

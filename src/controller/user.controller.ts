@@ -37,7 +37,7 @@ export async function createUser(req: Request<any, any, IUser>, res: Response) {
   if (!email || !password || !name) {
     throw new BadRequestError("All the required fields are not provided");
   }
-  const data = await UserService.createUser(body);
+  const data = await UserService.createUser(body, null);
   logger.info(`User created: ${data.id}`);
   return res.status(httpStatusCode.OK).json(data);
 }

@@ -28,6 +28,7 @@ export async function getUserById(id: UUID): Promise<Omit<IUser, "password">> {
  */
 export async function createUser(
   user: Omit<IUser, "id">,
+  creator?: UUID,
 ): Promise<Omit<IUser, "password">> {
   const existingUser = await UserModel.getUserByEmail(user.email);
   if (existingUser) {
@@ -41,7 +42,7 @@ export async function createUser(
     password: hashedPassword,
     permissions: user.permissions || [],
   };
-  const data = await UserModel.createUser(hashedUser);
+  const data = await UserModel.createUser(hashedUser, creator || hashedUser.id);
   return data;
 }
 
@@ -60,10 +61,7 @@ export async function updateUser(
   if (!name && !email && !password) {
     throw new EncryptionError(`No data provided to update`);
   }
-  const existingUser = getUserById(id);
-  if (!existingUser) {
-    throw new NotFoundError(`User with ${id} not found`);
-  }
+  await getUserById(id);
   const dataToUpdate: Partial<IUser> = {};
   if (name) dataToUpdate.name = name;
   if (email) dataToUpdate.email = email;
